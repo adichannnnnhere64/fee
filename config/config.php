@@ -9,6 +9,7 @@ return [
     | Configure the fee system behavior and defaults
     |
     */
+    'entity_date_column' => 'created_at',
 
     'cache' => [
         'enabled' => true,

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->decimal('value', 10, 4);
             $table->integer('calculation_type')->default(1);
             $table->boolean('is_active')->default(true);
+            $table->boolean('apply_to_existing_entity')->default(false)->after('is_global');
             $table->boolean('is_global')->default(false);
             $table->timestamp('effective_from')->nullable();
             /* $table->timestamp('effective_to')->nullable(); */

@@ -24,14 +24,16 @@ class FeeRule extends Model
         'is_global',
         'effective_from',
         'created_at',
+        'apply_to_existing_entity',
     ];
 
     protected $casts = [
         'value' => 'decimal:4',
         'is_active' => 'boolean',
         'is_global' => 'boolean',
-		'effective_from' => 'datetime',
-	'calculation_type' => CalculationType::class
+        'apply_to_existing_entity' => 'boolean',
+        'effective_from' => 'datetime',
+        'calculation_type' => CalculationType::class,
     ];
 
     protected static function booted()
@@ -182,6 +184,7 @@ class FeeRule extends Model
             'global_fee_id' => $globalFee->id, // Track which global fee was used
             'global_fee_effective_from' => $globalFee->effective_from, // When the global fee became active
             'is_revert_to_global' => true,
+	   'apply_to_existing_entity' => $globalFee->apply_to_existing_entity
         ];
     }
 
@@ -206,6 +209,7 @@ class FeeRule extends Model
                 'calculation_type' => $globalAttributes['calculation_type'],
                 'is_active' => true,
                 'effective_from' => $effectiveFrom,
+                'apply_to_existing_entity' => $globalAttributes['apply_to_existing_entity'],
 
                 // Metadata for tracking
                 'parent_fee_id' => $this->id,

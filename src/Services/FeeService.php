@@ -14,7 +14,6 @@ class FeeService
         $cacheKey = $this->getCacheKey($entity, $itemType);
 
         return Cache::remember($cacheKey, config('fee.cache.ttl'), function () use ($entity, $itemType) {
-            // Check for entity-specific fee
             if ($entity) {
                 $entityFee = FeeRule::forEntity($entity)
                     ->forItemType($itemType)
@@ -26,11 +25,34 @@ class FeeService
                 }
             }
 
-            // Fallback to global fee
-            return FeeRule::global()
+            $globalFee = FeeRule::global()
                 ->forItemType($itemType)
                 ->active()
                 ->first();
+
+            if (! $globalFee) {
+                return null;
+            }
+
+            if ($globalFee->apply_to_existing_entity) {
+                $dateColumn = config('fee.entity_date_column', 'created_at');
+
+                if (! $entity || ! isset($entity->{$dateColumn})) {
+                    return null;
+                }
+
+                $entityDate = $entity->{$dateColumn};
+
+                if (! $entityDate instanceof \Carbon\Carbon) {
+                    $entityDate = \Illuminate\Support\Carbon::parse($entityDate);
+                }
+
+                if ($entityDate->gt($globalFee->created_at)) {
+                    return null;
+                }
+            }
+
+            return $globalFee;
         });
     }
 
@@ -69,6 +91,7 @@ class FeeService
 
         // Log the change using DTO's reason
         $logReason = $dto->getReason();
+
 
         if ($existingFee) {
             $logReason = $existingFee->is_active ? 'Replaced active fee' : $logReason;

@@ -15,7 +15,8 @@ class CreateFee
         public CalculationType $calculationType,
         public bool $isActive = true,
         public ?Carbon $effectiveFrom = null,
-        public ?string $reason = null
+        public ?string $reason = null,
+        public bool $applyToExistingEntity = false,
     ) {
         $this->validate();
     }
@@ -44,6 +45,7 @@ class CreateFee
             'calculation_type' => $this->calculationType,
             'is_active' => $this->isActive,
             'effective_from' => $this->effectiveFrom?->toDateTimeString(),
+            'apply_to_existing_entity' => $this->applyToExistingEntity,
         ];
     }
 
@@ -55,7 +57,7 @@ class CreateFee
     protected function validate(): void
     {
         if (! in_array($this->calculationType, [CalculationType::PERCENTAGE, CalculationType::FLAT])) {
-            throw new \InvalidArgumentException("Calculation type must be CalculationType::PERCENTAGE or CalculationType::FLAT");
+            throw new \InvalidArgumentException('Calculation type must be CalculationType::PERCENTAGE or CalculationType::FLAT');
         }
 
         if ($this->value < 0) {
