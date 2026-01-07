@@ -18,7 +18,7 @@ class AnalyticsService implements AnalyticsInterface
         $startDate = $filter->startDate;
         $endDate = $filter->endDate;
 
-        $daysInMonth = $endDate->diffInDays($startDate) + 1;
+        $daysInMonth = max(1, $endDate->diffInDays($startDate) + 1);
 
         $totalRevenue = $this->getRevenueByFeeType($filter);
 
@@ -46,7 +46,7 @@ class AnalyticsService implements AnalyticsInterface
             'filters' => $filter->toArray(),
             'total_revenue' => $totalRevenue,
             'average_entity_revenue' => $avgEntityRevenue,
-            'daily_breakdown' => $dailyBreakdown,
+            ...$dailyBreakdown,
             'summary' => $this->calculateSummary($totalRevenue),
         ];
     }
@@ -250,40 +250,72 @@ class AnalyticsService implements AnalyticsInterface
 
     public function getDailyBreakdown(AnalyticsFilter $filter): array
     {
+        // Get dates from filter or use defaults
         $startDate = $filter->startDate ?? now()->startOfMonth();
         $endDate = $filter->endDate ?? now()->endOfMonth();
 
-        $daysInPeriod = $endDate->diffInDays($startDate) + 1;
+        // Always ensure start is beginning of day and end is end of day
+        $startDate = $startDate->copy()->startOfDay();
+        $endDate = $endDate->copy()->endOfDay();
+
+        // Calculate days in period: use start of day for both to get calendar days
+        // This handles cases where times might interfere with the calculation
+        $daysInPeriod = $startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay()) + 1;
+
+        // Ensure it's at least 1
+        $daysInPeriod = max(1, $daysInPeriod);
+
+        dump('DEBUG: Days in period calculation');
+        dump('Start Date:', $startDate->toDateTimeString());
+        dump('End Date:', $endDate->toDateTimeString());
+        dump('Start of Day Start:', $startDate->copy()->startOfDay()->toDateTimeString());
+        dump('Start of Day End:', $endDate->copy()->startOfDay()->toDateTimeString());
+        dump('diffInDays result:', $startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay()));
+        dump('Days in Period:', $daysInPeriod);
 
         $dailyBreakdown = [];
         $feeTypes = $filter->feeTypes ?: array_column(FeeType::cases(), 'value');
 
         foreach ($feeTypes as $feeType) {
-            dump($feeType);
             $dailyBreakdown[$feeType] = array_fill(1, $daysInPeriod, 0);
         }
 
         $query = $this->buildBaseQuery($filter);
 
+        // Use database-agnostic day extraction
+        if (config('database.default') === 'testing' || config('database.default') === 'sqlite') {
+            // SQLite uses strftime
+            $dayColumn = DB::raw("CAST(strftime('%d', applied_at) AS INTEGER) as day");
+        } else {
+            // MySQL uses DAY()
+            $dayColumn = DB::raw('DAY(applied_at) as day');
+        }
+
+        // Debug the query
+        dump('Query date range check:');
+        dump('Transactions in range:', FeeTransaction::whereBetween('applied_at', [$startDate, $endDate])->count());
+
         $dailyData = $query
             ->select(
-                DB::raw('DAY(applied_at) as day'),
+                $dayColumn,
                 'fee_type',
                 DB::raw('SUM(fee_amount) as total_amount'),
                 DB::raw('COUNT(*) as transaction_count')
             )
-            ->whereBetween('applied_at', [$startDate, $endDate])
-            ->groupBy(DB::raw('DAY(applied_at)'), 'fee_type')
+            ->groupBy(DB::raw('day'), 'fee_type')
             ->orderBy('day')
             ->orderBy('fee_type')
             ->get();
+
+        dump('Query results count:', $dailyData->count());
+        dump('Query results:', $dailyData->toArray());
 
         foreach ($dailyData as $data) {
             $day = (int) $data->day;
             $feeType = $data->fee_type;
 
-            if (isset($dailyBreakdown[$feeType]) && $day >= 1 && $day <= $daysInPeriod) {
-                $dailyBreakdown[$feeType][$day] = (float) $data->total_amount;
+            if (isset($dailyBreakdown[$feeType->value]) && $day >= 1 && $day <= $daysInPeriod) {
+                $dailyBreakdown[$feeType->value][$day] = (float) $data->total_amount;
             }
         }
 
@@ -293,6 +325,13 @@ class AnalyticsService implements AnalyticsInterface
             foreach ($dailyBreakdown as $feeType => $dailyData) {
                 $dailyTotals[$day] += $dailyData[$day];
             }
+        }
+
+        // Debug final result
+        dump('Final daily breakdown structure:');
+        dump('Number of days in arrays:', $daysInPeriod);
+        foreach ($feeTypes as $feeType) {
+            dump("$feeType array has ".count($dailyBreakdown[$feeType]).' elements');
         }
 
         return [
@@ -336,10 +375,22 @@ class AnalyticsService implements AnalyticsInterface
 
         foreach ($results as $result) {
             $hour = (int) $result->hour;
-            $hourlyBreakdown[$hour][$result->fee_type] = [
+            $hourlyBreakdown[$hour][$result->fee_type->value] = [
                 'total_amount' => (float) $result->total_amount,
                 'transaction_count' => (int) $result->transaction_count,
             ];
+        }
+
+        $feeTypes = $filter->feeTypes ?: array_column(FeeType::cases(), 'value');
+        for ($hour = 0; $hour < 24; $hour++) {
+            foreach ($feeTypes as $feeType) {
+                if (! isset($hourlyBreakdown[$hour][$feeType])) {
+                    $hourlyBreakdown[$hour][$feeType] = [
+                        'total_amount' => 0,
+                        'transaction_count' => 0,
+                    ];
+                }
+            }
         }
 
         return [
@@ -535,6 +586,15 @@ class AnalyticsService implements AnalyticsInterface
 
         foreach ($results as $result) {
             $hourlyTotals[$result->hour] += $result->total_amount;
+        }
+
+        $hourlyTotals = array_filter($hourlyTotals);
+        if (empty($hourlyTotals)) {
+            return [
+                'top_hours' => [],
+                'busiest_hour' => null,
+                'slowest_hour' => null,
+            ];
         }
 
         arsort($hourlyTotals);

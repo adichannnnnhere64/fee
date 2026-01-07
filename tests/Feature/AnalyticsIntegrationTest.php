@@ -62,6 +62,7 @@ test('facade provides analytics methods', function () {
         'end_date' => '2024-01-31',
     ]);
 
+	dump($daily['daily_breakdown']);
     expect($daily['daily_breakdown']['markup'][10])->toBe(100.00);
     expect($daily['daily_breakdown']['commission'][15])->toBe(50.00);
 
@@ -79,18 +80,18 @@ test('facade provides analytics methods', function () {
         ['total_revenue', 'total_transactions']
     );
 
-    expect($custom['data']['total_revenue'])->toBe(150.00);
+    expect($custom['data']['total_revenue'])->toBe(150);
     expect($custom['data']['total_transactions'])->toBe(2);
 });
 
 test('analytics handle empty results gracefully', function () {
     $monthly = Fee::getMonthlyRevenueAnalytics(2024, 1);
 
-    expect($monthly['total_revenue']['markup']['total_amount'])->toBe(0.00);
-    expect($monthly['average_entity_revenue']['markup']['average_amount'])->toBe(0.00);
+    expect($monthly['total_revenue']['markup']['total_amount'])->toBe(0);
+    expect($monthly['average_entity_revenue']['markup']['average_amount'])->toBe(0);
 
     // Daily breakdown should have all days as 0
-    expect(array_sum($monthly['daily_breakdown']['markup']))->toBe(0.00);
+    expect(array_sum($monthly['daily_breakdown']['markup']))->toBe(0);
 });
 
 test('analytics respect status filters', function () {

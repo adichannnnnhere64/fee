@@ -25,8 +25,8 @@ class MonthlyAnalyticsFilter extends AnalyticsFilter
         ?array $additionalFilters = []
     ) {
         parent::__construct(
-            startDate: $startDate ?? Carbon::create($year, $month, 1)->startOfMonth(),
-            endDate: $endDate ?? Carbon::create($year, $month, 1)->endOfMonth(),
+            startDate: $startDate ?? Carbon::create($year, $month, 1)->startOfMonth()->startOfDay(),
+            endDate: $endDate ?? Carbon::create($year, $month, 1)->endOfMonth()->endOfDay(),
             entityType: $entityType,
             entityId: $entityId,
             feeTypes: $feeTypes,
@@ -47,8 +47,8 @@ class MonthlyAnalyticsFilter extends AnalyticsFilter
         return new self(
             year: $year,
             month: $month,
-            startDate: isset($params['start_date']) ? Carbon::parse($params['start_date']) : null,
-            endDate: isset($params['end_date']) ? Carbon::parse($params['end_date']) : null,
+            startDate: isset($params['start_date']) ? Carbon::parse($params['start_date'])->startOfDay() : null,
+            endDate: isset($params['end_date']) ? Carbon::parse($params['end_date'])->endOfDay() : null,
             entityType: $params['entity_type'] ?? null,
             entityId: $params['entity_id'] ?? null,
             feeTypes: $params['fee_types'] ?? null,
