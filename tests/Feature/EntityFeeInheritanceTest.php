@@ -310,21 +310,13 @@ test('multiple fee updates with effective dates', function () {
     // Should now use global2 (12%)
     $calc2 = Fee::calculateFor($merchant, 100.00, 'product');
     // Before traveling, debug
-    dump('Before travel - Current time:', now()->toDateTimeString());
-    dump('Global2 effective_from:', $global2->effective_from);
-    dump('Is global2 active?', $global2->isCurrentlyActive());
+
 
     // Travel
     $this->travelTo($now->copy()->addDays(6));
 
-    // After traveling, debug
-    dump('After travel - Current time:', now()->toDateTimeString());
     $activeFee = app('fee.service')->getActiveFeeFor($merchant, 'product');
-    dump('Active fee after travel:', $activeFee ? [
-        'id' => $activeFee->id,
-        'value' => $activeFee->value,
-        'effective_from' => $activeFee->effective_from,
-    ] : 'No active fee');
+
     expect($calc2['fee_amount'])->toBe(12.00)
         ->and($calc2['fee_rule']['id'])->toBe($global2->id);
 
