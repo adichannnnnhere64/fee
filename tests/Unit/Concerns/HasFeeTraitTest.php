@@ -10,7 +10,7 @@ use Repay\Fee\Tests\Fixtures\Merchant;
 use Repay\Fee\Tests\Fixtures\Order;
 use Repay\Fee\Traits\HasFee;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create a test model that implements the interface and uses the trait
     $this->testModel = new class extends Model implements FeeableInterface
     {
@@ -64,33 +64,33 @@ beforeEach(function () {
     $this->testModel->exists = true;
 });
 
-test('trait adds fee transaction relationship', function () {
+test('trait adds fee transaction relationship', function (): void {
     expect(method_exists($this->testModel, 'feeTransaction'))->toBeTrue();
 
     $relation = $this->testModel->feeTransaction();
     expect($relation)->toBeInstanceOf(\Illuminate\Database\Eloquent\Relations\MorphOne::class);
 });
 
-test('fee rule attribute returns null when no fee rule exists', function () {
+test('fee rule attribute returns null when no fee rule exists', function (): void {
     $rule = $this->testModel->fee_rule;
     expect($rule)->toBeNull();
 });
 
-test('fee attribute returns zero when no fee rule or transaction', function () {
+test('fee attribute returns zero when no fee rule or transaction', function (): void {
     $fee = $this->testModel->fee;
     expect($fee)->toBe(0.0);
 });
 
-test('total with fee attribute returns base amount when no fee', function () {
+test('total with fee attribute returns base amount when no fee', function (): void {
     $total = $this->testModel->total_with_fee;
     expect($total)->toBe(100.0);
 });
 
-test('has fee processed attribute returns false when no transaction', function () {
+test('has fee processed attribute returns false when no transaction', function (): void {
     expect($this->testModel->has_fee_processed)->toBeFalse();
 });
 
-test('fee rule attribute returns fee rule when exists', function () {
+test('fee rule attribute returns fee rule when exists', function (): void {
     // Create a fee rule for the merchant
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->testModel->merchant),
@@ -109,7 +109,7 @@ test('fee rule attribute returns fee rule when exists', function () {
         ->value->toBe('10.0000');
 });
 
-test('fee attribute calculates correctly when fee rule exists', function () {
+test('fee attribute calculates correctly when fee rule exists', function (): void {
     FeeRule::create([
         'entity_type' => get_class($this->testModel->merchant),
         'entity_id' => $this->testModel->merchant->id,
@@ -125,7 +125,7 @@ test('fee attribute calculates correctly when fee rule exists', function () {
     expect($fee)->toBe(10.0); // 10% of 100
 });
 
-test('total with fee attribute includes calculated fee', function () {
+test('total with fee attribute includes calculated fee', function (): void {
     FeeRule::create([
         'entity_type' => get_class($this->testModel->merchant),
         'entity_id' => $this->testModel->merchant->id,
@@ -141,7 +141,7 @@ test('total with fee attribute includes calculated fee', function () {
     expect($total)->toBe(110.0); // 100 + 10
 });
 
-test('fee attribute uses transaction amount when exists', function () {
+test('fee attribute uses transaction amount when exists', function (): void {
     $merchant = Merchant::create([
         'name' => 'merchant',
     ]);
@@ -180,11 +180,11 @@ test('fee attribute uses transaction amount when exists', function () {
     ]);
 
     $fee = $order->fee;
-    expect($fee)->toBe(15.0); 
+    expect($fee)->toBe(15.0);
     expect($order->has_fee_processed)->toBeTrue();
 });
 
-test('trait works with fixed fee calculation', function () {
+test('trait works with fixed fee calculation', function (): void {
     $this->testModel->amount = 50.00;
 
     FeeRule::create([
@@ -202,7 +202,7 @@ test('trait works with fixed fee calculation', function () {
     expect($fee)->toBe(5.0); // Fixed fee, not percentage
 });
 
-test('process fee method returns error when not implementing interface', function () {
+test('process fee method returns error when not implementing interface', function (): void {
     $model = new class extends Model
     {
         use HasFee;
@@ -215,7 +215,7 @@ test('process fee method returns error when not implementing interface', functio
     expect($result)->toHaveKey('error');
 });
 
-test('trait gracefully handles missing fee entity', function () {
+test('trait gracefully handles missing fee entity', function (): void {
     $model = new class extends Model implements FeeableInterface
     {
         use HasFee;
@@ -249,7 +249,7 @@ test('trait gracefully handles missing fee entity', function () {
     expect($fee)->toBe(0.0);
 });
 
-test('trait handles service item type', function () {
+test('trait handles service item type', function (): void {
     $this->testModel->item_type = 'service';
 
     FeeRule::create([

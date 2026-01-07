@@ -13,7 +13,7 @@ use Repay\Fee\Services\FeeTransactionService;
 use Repay\Fee\Tests\Fixtures\Merchant;
 use Repay\Fee\Tests\Fixtures\User;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->transactionService = new FeeTransactionService;
     $this->feeService = app('fee.service');
 
@@ -22,7 +22,7 @@ beforeEach(function () {
     FeeRule::query()->delete();
 });
 
-test('fee context interface works with order model', function () {
+test('fee context interface works with order model', function (): void {
     // Create a proper test double that EXPLICITLY implements the interface
     $order = new class implements \Repay\Fee\Contracts\FeeContextInterface
     {
@@ -154,7 +154,7 @@ test('fee context interface works with order model', function () {
     }
 });
 
-test('fee context interface works with invoice model for service items', function () {
+test('fee context interface works with invoice model for service items', function (): void {
     // Mock an Invoice model implementing FeeContextInterface
     $invoice = Mockery::mock(FeeContextInterface::class);
 
@@ -228,7 +228,7 @@ test('fee context interface works with invoice model for service items', functio
     }
 });
 
-test('fee context interface handles global fees when no fee entity', function () {
+test('fee context interface handles global fees when no fee entity', function (): void {
     // Mock a generic transaction with no specific fee entity
     $transaction = Mockery::mock(FeeContextInterface::class);
 
@@ -277,7 +277,7 @@ test('fee context interface handles global fees when no fee entity', function ()
         ->and($calculation['fee_rule']['is_global'])->toBeTrue();
 });
 
-test('fee context interface with multiple item types in same context', function () {
+test('fee context interface with multiple item types in same context', function (): void {
     // Mock a complex order with mixed items
     $mixedOrder = Mockery::mock(FeeContextInterface::class);
 
@@ -333,7 +333,7 @@ test('fee context interface with multiple item types in same context', function 
     expect($serviceCalculation['fee_amount'])->toBe(300.00); // 10% of 3000
 });
 
-test('fee context interface metadata is properly recorded', function () {
+test('fee context interface metadata is properly recorded', function (): void {
     // Mock a detailed invoice
     $detailedInvoice = Mockery::mock(FeeContextInterface::class);
 
@@ -408,8 +408,7 @@ test('fee context interface metadata is properly recorded', function () {
         ->currency->toBe('EUR');
 });
 
-test('fee facade provides context-aware methods', function () {
-
+test('fee facade provides context-aware methods', function (): void {
 
     $customer = User::create(['name' => 'Test Customer', 'email' => 'test@example.com']);
     $merchant = Merchant::create(['name' => 'Test Merchant', 'business_id' => 'TEST123']);
@@ -494,7 +493,7 @@ test('fee facade provides context-aware methods', function () {
         ->has_fee->toBeTrue();
 });
 
-test('fee context interface works with inheritance', function () {
+test('fee context interface works with inheritance', function (): void {
     // Test that child classes can implement the interface
     // Create a mock child class
     $childClass = Mockery::mock(FeeContextInterface::class);
@@ -526,6 +525,6 @@ test('fee context interface works with inheritance', function () {
         ->and(is_callable([$childClass, 'getItemType']))->toBeTrue();
 });
 
-afterEach(function () {
+afterEach(function (): void {
     Mockery::close();
 });

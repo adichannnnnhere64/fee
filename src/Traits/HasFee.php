@@ -41,7 +41,6 @@ trait HasFee
             return 0.0;
         }
 
-
         if ($this->feeTransaction) {
             return (float) $this->feeTransaction->fee_amount;
         }

@@ -108,7 +108,7 @@ class TestCase extends Orchestra
         $schema = $this->app['db']->connection()->getSchemaBuilder();
 
         if (! $schema->hasTable('users')) {
-            $schema->create('users', function ($table) {
+            $schema->create('users', function ($table): void {
                 $table->id();
                 $table->string('name');
                 $table->string('email')->nullable();
@@ -117,7 +117,7 @@ class TestCase extends Orchestra
         }
 
         if (! $schema->hasTable('merchants')) {
-            $schema->create('merchants', function ($table) {
+            $schema->create('merchants', function ($table): void {
                 $table->id();
                 $table->string('name');
                 $table->string('business_id')->nullable();
@@ -126,7 +126,7 @@ class TestCase extends Orchestra
         }
 
         if (! $schema->hasTable('test_contexts')) {
-            $schema->create('test_contexts', function ($table) {
+            $schema->create('test_contexts', function ($table): void {
                 $table->id();
                 $table->timestamps();
             });
@@ -134,7 +134,7 @@ class TestCase extends Orchestra
         }
 
         if (! $schema->hasTable('orders')) {
-            $schema->create('orders', function ($table) {
+            $schema->create('orders', function ($table): void {
                 $table->id();
                 $table->string('name');
                 $table->integer('merchant_id');
@@ -144,7 +144,7 @@ class TestCase extends Orchestra
         }
 
         if (! $schema->hasTable('test_orders')) {
-            $schema->create('test_orders', function ($table) {
+            $schema->create('test_orders', function ($table): void {
                 $table->id();
                 $table->integer('merchant_id');
                 $table->integer('customer_id');
@@ -154,7 +154,7 @@ class TestCase extends Orchestra
         }
 
         if (! $schema->hasTable('test_services')) {
-            $schema->create('test_services', function ($table) {
+            $schema->create('test_services', function ($table): void {
                 $table->id();
                 $table->integer('provider_id');
                 $table->integer('client_id');
