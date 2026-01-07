@@ -2,6 +2,9 @@
 
 namespace Repay\Fee;
 
+use Repay\Fee\DTO\AnalyticsFilter;
+use Repay\Fee\DTO\MonthlyAnalyticsFilter;
+use Repay\Fee\Services\AnalyticsService;
 use Repay\Fee\Services\FeeHistoryService;
 use Repay\Fee\Services\FeeService;
 use Repay\Fee\Services\FeeTransactionService;
@@ -21,7 +24,8 @@ class Fee
         FeeService $service,
         FeeHistoryService $history,
         UpcomingFeeService $upcoming,
-        FeeTransactionService $transactions
+        FeeTransactionService $transactions,
+        protected AnalyticsService $analytics,
     ) {
         $this->service = $service;
         $this->history = $history;
@@ -57,6 +61,10 @@ class Fee
 
         if (method_exists($this->transactions, $method)) {
             return $this->transactions->{$method}(...$parameters);
+        }
+
+        if (method_exists($this->analytics, $method)) {
+            return $this->analytics->{$method}(...$parameters);
         }
 
         throw new \BadMethodCallException("Method {$method} does not exist.");
@@ -109,5 +117,75 @@ class Fee
     public function clearHistoryCacheForEntityTypeAndId(string $entityType, $entityId): void
     {
         $this->history->clearHistoryCacheForEntityTypeAndId($entityType, $entityId);
+    }
+
+    // Analytics Methods
+    public function getMonthlyRevenueAnalytics(int $year, int $month, array $filters = [])
+    {
+        $filter = MonthlyAnalyticsFilter::createForMonth($year, $month, $filters);
+
+        return $this->analytics->getMonthlyRevenueAnalytics($filter);
+    }
+
+    public function getRevenueByDateRange(array $filters = [])
+    {
+        $filter = AnalyticsFilter::create($filters);
+
+        return $this->analytics->getRevenueByDateRange($filter);
+
+    }
+
+    public function getRevenueByFeeType(array $filters = [])
+    {
+        $filter = AnalyticsFilter::create($filters);
+
+        return $this->analytics->getRevenueByFeeType($filter);
+    }
+
+    public function getEntityRevenue(array $filters = [])
+    {
+        $filter = AnalyticsFilter::create($filters);
+
+        return $this->analytics->getEntityRevenue($filter);
+
+    }
+
+    public function getTopRevenueGenerators(array $filters = [])
+    {
+        $filter = AnalyticsFilter::create($filters);
+
+        return $this->analytics->getTopRevenueGenerators($filter);
+    }
+
+    public function getDailyBreakdown(array $filters = [])
+    {
+        $filter = AnalyticsFilter::create($filters);
+
+        return $this->analytics->getDailyBreakdown($filter);
+
+    }
+
+    public function getHourlyBreakdown(array $filters = [])
+    {
+
+        $filter = AnalyticsFilter::create($filters);
+
+        return $this->analytics->getHourlyBreakdown($filter);
+    }
+
+    public function getComparativeAnalysis(array $filters1 = [], array $filters2 = [])
+    {
+        $filter1 = AnalyticsFilter::create($filters1);
+        $filter2 = AnalyticsFilter::create($filters2);
+
+        return $this->analytics->getComparativeAnalysis($filter1, $filter2);
+    }
+
+    public function getCustomReport(array $filters = [], array $metrics = [])
+    {
+
+        $filter = AnalyticsFilter::create($filters);
+
+        return $this->analytics->getCustomReport($filter, $metrics);
     }
 }

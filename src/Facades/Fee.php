@@ -18,6 +18,21 @@ use Illuminate\Support\Facades\Facade;
  * @method static array getLatestUpcomingFees($entity = null)
  * @method static \Repay\Fee\Models\FeeRule|null getUpcomingFee(string $itemType, $entity = null)
  * @method static void clearUpcomingCache($entity = null)
+ * @method static \Repay\Fee\Models\FeeTransaction recordFee(...$args)
+ * @method static \Repay\Fee\Models\FeeTransaction reverseFee(...$args)
+ * @method static \Illuminate\Pagination\LengthAwarePaginator getFeesForBearer($bearer, array $filters = [])
+ * @method static array getTotalFeesForBearer($bearer, array $filters = [])
+ * 
+ * Analytics Methods
+ * @method static array getMonthlyRevenueAnalytics(int $year, int $month, array $filters = [])
+ * @method static array getRevenueByDateRange(array $filters = [])
+ * @method static array getRevenueByFeeType(array $filters = [])
+ * @method static array getEntityRevenue(array $filters = [])
+ * @method static array getTopRevenueGenerators(array $filters = [])
+ * @method static array getDailyBreakdown(array $filters = [])
+ * @method static array getHourlyBreakdown(array $filters = [])
+ * @method static array getComparativeAnalysis(array $filters1 = [], array $filters2 = [])
+ * @method static array getCustomReport(array $filters = [], array $metrics = [])
  */
 class Fee extends Facade
 {
