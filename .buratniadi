@@ -1,0 +1,21 @@
+'''
+This is a robust fee markup that should apply to any kind of entity 
+1 entity may have 2 active fee rule. 1 of 2 active fee should be item type of product, and the other item type is service.
+1 entity should not have 2 active fee of item type product or 2 service.
+product item_type should only be for markup
+service item_type should only be for commission or convenience
+1 entity may have 0 fee initially
+1 entity may have only 2 active global fee
+1 entity may have only 1 active global fee & 1 active specific fee
+1 entity may have only 1 active specific fee & 1 active specific fee
+
+currently all tests works and passing, but I want to have a new tests 
+but i want to have tests a function that getPreviousFee from global fee to specific fee. Currently, I think the current getPreviousFee only applies to specific attach entity. But what if the entity has been using global fee before. imagine a entity has current active fee of global fee, then there is a switch to specific fee. so there will be a fee history of global fee (eg. 50%) > specific fee (eg. 70%). But the active fee is still global fee, but this fee history should be visible on the frontend. 
+
+'''
+
+composer.json
+src/**/*.php
+tests/**/*.php
+config/**/*.php
+
