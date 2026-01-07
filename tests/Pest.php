@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Repay\Fee\FeeServiceProvider;
 use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeTransaction;
+use Repay\Fee\Tests\Fixtures\Merchant;
 use Repay\Fee\Tests\TestCase;
 
 /* use Orchestra\Testbench\TestCase; */
@@ -105,6 +106,16 @@ function mockUser(int $id = 1)
 
         }
     };
+}
+
+function createMerchant($name = 'rpy'): Merchant
+{
+
+    return Merchant::create([
+        'name' => $name,
+        'business_id' => 'repay',
+    ]);
+
 }
 
 function createTransaction(

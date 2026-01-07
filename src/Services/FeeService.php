@@ -14,13 +14,15 @@ class FeeService
 
         return Cache::remember($cacheKey, config('fee.cache.ttl'), function () use ($entity, $itemType) {
             // Check for entity-specific fee
-            $entityFee = FeeRule::forEntity($entity)
-                ->forItemType($itemType)
-                ->active()
-                ->first();
+            if ($entity) {
+                $entityFee = FeeRule::forEntity($entity)
+                    ->forItemType($itemType)
+                    ->active()
+                    ->first();
 
-            if ($entityFee) {
-                return $entityFee;
+                if ($entityFee) {
+                    return $entityFee;
+                }
             }
 
             // Fallback to global fee
@@ -155,6 +157,12 @@ class FeeService
     {
         $prefix = config('fee.cache.prefix', 'fee_rules:');
 
+        // Handle null entity
+        if ($entity === null) {
+            return $prefix.'global:'.$itemType;
+        }
+
+        // Handle object entity
         return $prefix.get_class($entity).':'.$entity->getKey().':'.$itemType;
     }
 }

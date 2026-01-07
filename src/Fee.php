@@ -2,6 +2,8 @@
 
 namespace Repay\Fee;
 
+use Repay\Fee\Contracts\FeeableInterface;
+use Repay\Fee\Contracts\FeeContextInterface;
 use Repay\Fee\DTO\AnalyticsFilter;
 use Repay\Fee\DTO\MonthlyAnalyticsFilter;
 use Repay\Fee\Services\AnalyticsService;
@@ -187,5 +189,97 @@ class Fee
         $filter = AnalyticsFilter::create($filters);
 
         return $this->analytics->getCustomReport($filter, $metrics);
+    }
+
+    public function processFeeContext(FeeContextInterface $context): array
+    {
+        $feeEntity = $context->getFeeEntity();
+        $itemType = $context->getItemType();
+        $amount = $context->getAmountForFeeCalculation();
+
+        // Get active fee rule
+        // dd($fe)
+        $feeRule = $this->service->getActiveFeeFor($feeEntity, $itemType);
+
+        if (! $feeRule) {
+            return ['has_fee' => false];
+        }
+
+        // Calculate fee
+        $feeAmount = $feeRule->calculate($amount);
+
+        // Record transaction using context-aware method
+        $transaction = $this->transactions->recordFeeFromContext(
+            feeRule: $feeRule,
+            context: $context,
+            metadata: [
+                'auto_processed' => true,
+                'total_with_fee' => $amount + $feeAmount,
+            ]
+        );
+
+        return [
+            'has_fee' => true,
+            'fee_amount' => $feeAmount,
+            'total_amount' => $amount,
+            'total_with_fee' => $amount + $feeAmount,
+            'fee_rule' => $feeRule,
+            'transaction' => $transaction,
+            'fee_bearer' => [
+                'type' => get_class($transaction->feeBearer),
+                'id' => $transaction->fee_bearer_id,
+            ],
+        ];
+    }
+
+    public function processFeeForModel(FeeableInterface $model, ?string $transactionId = null): array
+    {
+        return $this->transactions->processFeeForModel($model, $transactionId);
+    }
+
+    /**
+     * Calculate fee without recording
+     */
+    public function calculateFeeForModel(FeeableInterface $model): array
+    {
+        return $this->transactions->calculateFeeForModel($model);
+    }
+
+    /**
+     * Check if model has fee processed
+     */
+    public function hasFeeProcessed($model): bool
+    {
+        return $this->transactions->hasFeeProcessed($model);
+    }
+
+    /**
+     * Get fee transaction for any model
+     */
+    public function getTransactionFor($model): ?\Repay\Fee\Models\FeeTransaction
+    {
+        return $this->transactions->getTransactionFor($model);
+    }
+
+    /**
+     * Get all fee transactions for a model type
+     */
+    public function getTransactionsForModelType(string $modelClass, array $filters = []): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        return $this->transactions->getTransactionsForModelType($modelClass, $filters);
+    }
+
+    /**
+     * Process fee using context (for backward compatibility)
+     */
+    public function processFeeForContext(FeeContextInterface $context): array
+    {
+        // If context also implements FeeableInterface, use the simpler method
+        if ($context instanceof FeeableInterface) {
+            return $this->processFeeForModel($context);
+        }
+
+        // Otherwise use the full context method
+        return $this->processFeeContext($context);
     }
 }

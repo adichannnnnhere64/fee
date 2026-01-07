@@ -22,6 +22,13 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Repay\Fee\Models\FeeTransaction reverseFee(...$args)
  * @method static \Illuminate\Pagination\LengthAwarePaginator getFeesForBearer($bearer, array $filters = [])
  * @method static array getTotalFeesForBearer($bearer, array $filters = [])
+ * 
+ * // Model-based methods
+ * @method static array processFeeForModel(\Repay\Fee\Contracts\FeeableInterface $model, ?string $transactionId = null)
+ * @method static array calculateFeeForModel(\Repay\Fee\Contracts\FeeableInterface $model)
+ * @method static bool hasFeeProcessed($model)
+ * @method static \Repay\Fee\Models\FeeTransaction|null getTransactionFor($model)
+ * @method static \Illuminate\Pagination\LengthAwarePaginator getTransactionsForModelType(string $modelClass, array $filters = [])
  *
  * Analytics Methods
  * @method static array getMonthlyRevenueAnalytics(int $year, int $month, array $filters = [])

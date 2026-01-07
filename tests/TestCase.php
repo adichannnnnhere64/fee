@@ -17,6 +17,7 @@ class TestCase extends Orchestra
 
         // Set up test configuration
         config(['fee.cache.enabled' => false]); // Disable cache for testing
+        $this->createTestTables();
     }
 
     protected function getPackageProviders($app): array
@@ -100,5 +101,65 @@ class TestCase extends Orchestra
             'new_data' => $feeRule->toArray(),
             'reason' => 'Test reason',
         ], $data));
+    }
+
+    protected function createTestTables(): void
+    {
+        $schema = $this->app['db']->connection()->getSchemaBuilder();
+
+        if (! $schema->hasTable('users')) {
+            $schema->create('users', function ($table) {
+                $table->id();
+                $table->string('name');
+                $table->string('email')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (! $schema->hasTable('merchants')) {
+            $schema->create('merchants', function ($table) {
+                $table->id();
+                $table->string('name');
+                $table->string('business_id')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (! $schema->hasTable('test_contexts')) {
+            $schema->create('test_contexts', function ($table) {
+                $table->id();
+                $table->timestamps();
+            });
+
+        }
+
+        if (! $schema->hasTable('orders')) {
+            $schema->create('orders', function ($table) {
+                $table->id();
+                $table->string('name');
+                $table->integer('merchant_id');
+                $table->timestamps();
+            });
+
+        }
+
+        if (! $schema->hasTable('test_orders')) {
+            $schema->create('test_orders', function ($table) {
+                $table->id();
+                $table->integer('merchant_id');
+                $table->integer('customer_id');
+                $table->decimal('amount', 10, 2);
+                $table->string('item_type')->default('product');
+            });
+        }
+
+        if (! $schema->hasTable('test_services')) {
+            $schema->create('test_services', function ($table) {
+                $table->id();
+                $table->integer('provider_id');
+                $table->integer('client_id');
+                $table->decimal('total_amount', 10, 2);
+            });
+        }
     }
 }
