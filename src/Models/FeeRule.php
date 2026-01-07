@@ -268,4 +268,12 @@ class FeeRule extends Model
 
         $this->revertToGlobal($effectiveFrom, $reason);
     }
+
+    public function deactivate(): void
+    {
+        cache()->purge();
+        $this->update([
+            'is_active' => false,
+        ]);
+    }
 }

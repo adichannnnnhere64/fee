@@ -120,6 +120,7 @@ class TestCase extends Orchestra
             $schema->create('merchants', function ($table): void {
                 $table->id();
                 $table->string('name');
+                $table->string('business_type')->nullable();
                 $table->string('business_id')->nullable();
                 $table->timestamps();
             });
@@ -134,13 +135,19 @@ class TestCase extends Orchestra
         }
 
         if (! $schema->hasTable('orders')) {
-            $schema->create('orders', function ($table): void {
+            $schema->create('orders', function ($table) {
                 $table->id();
-                $table->string('name');
-                $table->integer('merchant_id');
+                $table->string('name')->nullable();
+                $table->foreignId('customer_id')->nullable();
+                $table->foreignId('merchant_id')->constrained('merchants');
+                $table->foreignId('product_id')->nullable();
+                $table->integer('quantity')->nullable();
+                $table->decimal('unit_price', 10, 2)->nullable();
+                $table->decimal('total_amount', 10, 2)->nullable();
+                $table->string('status')->default('pending');
+                $table->string('order_number')->nullable();
                 $table->timestamps();
             });
-
         }
 
         if (! $schema->hasTable('test_orders')) {

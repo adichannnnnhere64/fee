@@ -119,6 +119,7 @@ test('fee attribute calculates correctly when fee rule exists', function (): voi
         'calculation_type' => 'percentage',
         'is_active' => true,
         'is_global' => false,
+	'effective_from' => now()->subDays(2)
     ]);
 
     $fee = $this->testModel->fee;

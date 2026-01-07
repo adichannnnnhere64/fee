@@ -46,7 +46,7 @@ trait HasFee
         }
 
         $feeRule = $this->fee_rule;
-        if ($feeRule) {
+        if ($feeRule && $feeRule->effective_from < now()) {
             return (float) $feeRule->calculate($this->getFeeBaseAmount());
         }
 
