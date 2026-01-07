@@ -90,13 +90,7 @@ test('merchants inherit global fees but can override with specific fees', functi
     $merchant3Calc3 = Fee::calculateFor($merchants[3], 100.00, 'product');
 
     $activeFee = app('fee.service')->getActiveFeeFor($merchants[3], 'product');
-    dump('After deactivation - Active fee found:', $activeFee ? [
-        'id' => $activeFee->id,
-        'value' => $activeFee->value,
-        'is_active' => $activeFee->is_active,
-        'effective_from' => $activeFee->effective_from,
-        'is_global' => $activeFee->is_global,
-    ] : 'No active fee found');
+
 
     // Also check what global fees are available
     $globalFees = FeeRule::global()
@@ -104,11 +98,7 @@ test('merchants inherit global fees but can override with specific fees', functi
         ->active()
         ->orderBy('effective_from', 'desc')
         ->get();
-    dump('Available global fees:', $globalFees->map(fn ($f) => [
-        'id' => $f->id,
-        'value' => $f->value,
-        'effective_from' => $f->effective_from,
-    ]));
+
     expect($merchant3Calc3['fee_amount'])->toBe(10.00) // Back to 10%
         ->and($merchant3Calc3['fee_rule']['id'])->toBe($globalFee1->id);
 

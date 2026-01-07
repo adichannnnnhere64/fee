@@ -114,16 +114,10 @@ test('get daily breakdown returns array indexed by day', function () {
 
     // Debug: Check what transactions exist
     $transactions = FeeTransaction::all();
-    dump('Total transactions:', $transactions->count());
-    dump('Transaction dates:', $transactions->pluck('applied_at'));
 
     $result = $this->service->getDailyBreakdown($filter);
 
-    dump('Result daily breakdown markup:', $result['daily_breakdown']['markup']);
-    dump('Result daily breakdown commission:', $result['daily_breakdown']['commission']);
-
     expect($result['daily_breakdown']['markup'][5])->toBe(300.00); // Day 5 total
-    // ... rest of assertions
 });
 
 test('get comparative analysis shows percentage changes', function () {

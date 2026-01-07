@@ -265,13 +265,7 @@ class AnalyticsService implements AnalyticsInterface
         // Ensure it's at least 1
         $daysInPeriod = max(1, $daysInPeriod);
 
-        dump('DEBUG: Days in period calculation');
-        dump('Start Date:', $startDate->toDateTimeString());
-        dump('End Date:', $endDate->toDateTimeString());
-        dump('Start of Day Start:', $startDate->copy()->startOfDay()->toDateTimeString());
-        dump('Start of Day End:', $endDate->copy()->startOfDay()->toDateTimeString());
-        dump('diffInDays result:', $startDate->copy()->startOfDay()->diffInDays($endDate->copy()->startOfDay()));
-        dump('Days in Period:', $daysInPeriod);
+
 
         $dailyBreakdown = [];
         $feeTypes = $filter->feeTypes ?: array_column(FeeType::cases(), 'value');
@@ -292,8 +286,6 @@ class AnalyticsService implements AnalyticsInterface
         }
 
         // Debug the query
-        dump('Query date range check:');
-        dump('Transactions in range:', FeeTransaction::whereBetween('applied_at', [$startDate, $endDate])->count());
 
         $dailyData = $query
             ->select(
@@ -307,8 +299,7 @@ class AnalyticsService implements AnalyticsInterface
             ->orderBy('fee_type')
             ->get();
 
-        dump('Query results count:', $dailyData->count());
-        dump('Query results:', $dailyData->toArray());
+
 
         foreach ($dailyData as $data) {
             $day = (int) $data->day;
@@ -325,13 +316,6 @@ class AnalyticsService implements AnalyticsInterface
             foreach ($dailyBreakdown as $feeType => $dailyData) {
                 $dailyTotals[$day] += $dailyData[$day];
             }
-        }
-
-        // Debug final result
-        dump('Final daily breakdown structure:');
-        dump('Number of days in arrays:', $daysInPeriod);
-        foreach ($feeTypes as $feeType) {
-            dump("$feeType array has ".count($dailyBreakdown[$feeType]).' elements');
         }
 
         return [

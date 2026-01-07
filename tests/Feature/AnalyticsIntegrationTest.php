@@ -62,7 +62,6 @@ test('facade provides analytics methods', function () {
         'end_date' => '2024-01-31',
     ]);
 
-	dump($daily['daily_breakdown']);
     expect($daily['daily_breakdown']['markup'][10])->toBe(100.00);
     expect($daily['daily_breakdown']['commission'][15])->toBe(50.00);
 

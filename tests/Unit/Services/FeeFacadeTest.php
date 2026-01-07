@@ -56,24 +56,24 @@ test('facade calculateFor works correctly', function () {
 
 
 
-test('debug facade registration', function () {
-    // Check what class is registered as 'fee'
-    $registered = app('fee');
-    dump('Registered class:', get_class($registered));
-    
-    // Check what the facade resolves to
-    $facadeRoot = Fee::getFacadeRoot();
-    dump('Facade root class:', get_class($facadeRoot));
-    
-    // Check if Fee class has the methods
-    dump('Fee has logFeeChange?', method_exists($registered, 'logFeeChange'));
-    dump('Fee has getHistoryForEntity?', method_exists($registered, 'getHistoryForEntity'));
-    
-    // Check if it has __call method
-    dump('Fee has __call?', method_exists($registered, '__call'));
-    
-    expect(true)->toBeTrue();
-});
+/* test('debug facade registration', function () { */
+/*     // Check what class is registered as 'fee' */
+/*     $registered = app('fee'); */
+/*     dump('Registered class:', get_class($registered)); */
+/**/
+/*     // Check what the facade resolves to */
+/*     $facadeRoot = Fee::getFacadeRoot(); */
+/*     dump('Facade root class:', get_class($facadeRoot)); */
+/**/
+/*     // Check if Fee class has the methods */
+/*     dump('Fee has logFeeChange?', method_exists($registered, 'logFeeChange')); */
+/*     dump('Fee has getHistoryForEntity?', method_exists($registered, 'getHistoryForEntity')); */
+/**/
+/*     // Check if it has __call method */
+/*     dump('Fee has __call?', method_exists($registered, '__call')); */
+/**/
+/*     expect(true)->toBeTrue(); */
+/* }); */
 
 test('facade setFeeForEntity works correctly', function () {
     $data = [
