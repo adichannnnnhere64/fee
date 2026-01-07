@@ -25,15 +25,19 @@ class FeeServiceProvider extends ServiceProvider
 
         // Register individual services
         $this->app->singleton('fee.service', function ($app) {
-            return new Services\FeeService();
+            return new Services\FeeService;
         });
 
         $this->app->singleton('fee.history', function ($app) {
-            return new Services\FeeHistoryService();
+            return new Services\FeeHistoryService;
         });
 
         $this->app->singleton('fee.upcoming', function ($app) {
-            return new Services\UpcomingFeeService();
+            return new Services\UpcomingFeeService;
+        });
+
+        $this->app->singleton('fee.transactions', function ($app) {
+            return new Services\FeeTransactionService;
         });
 
         // IMPORTANT: Register the main Fee class as 'fee'
@@ -41,7 +45,8 @@ class FeeServiceProvider extends ServiceProvider
             return new Fee(
                 $app['fee.service'],
                 $app['fee.history'],
-                $app['fee.upcoming']
+                $app['fee.upcoming'],
+				        $app['fee.transactions'] 
             );
         });
 

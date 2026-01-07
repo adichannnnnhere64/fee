@@ -218,12 +218,12 @@ class FeeRule extends Model
             // Deactivate the old fee (set effective_to)
             $this->update([
                 'effective_to' => $effectiveFrom,
-                'replaced_by_fee_id' => $newFee->id,
+                'replaced_by_fee_id' => $newFee->id
             ]);
 
             // Log the change
             FeeHistory::create([
-                'fee_id' => $newFee->id,
+                'fee_rule_id' => $newFee->id,
                 'action' => 'revert_to_global',
                 'old_fee_id' => $this->id,
                 'global_fee_id' => $globalAttributes['global_fee_id'],
