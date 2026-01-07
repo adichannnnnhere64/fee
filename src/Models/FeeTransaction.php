@@ -2,8 +2,8 @@
 
 namespace Repay\Fee\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Repay\Fee\Enums\FeeTransactionStatus;
@@ -43,7 +43,7 @@ class FeeTransaction extends Model
 
     protected static function booted()
     {
-        static::creating(function ($model) {
+        static::creating(function ($model): void {
             if (empty($model->applied_at)) {
                 $model->applied_at = now();
             }
@@ -85,11 +85,11 @@ class FeeTransaction extends Model
     public function scopeInDateRange($query, $startDate, $endDate = null)
     {
         $query->whereDate('applied_at', '>=', $startDate);
-        
+
         if ($endDate) {
             $query->whereDate('applied_at', '<=', $endDate);
         }
-        
+
         return $query;
     }
 }

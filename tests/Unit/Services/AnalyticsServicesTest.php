@@ -9,7 +9,7 @@ use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeTransaction;
 use Repay\Fee\Services\AnalyticsService;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->service = new AnalyticsService;
     FeeTransaction::query()->delete();
     FeeRule::query()->delete();
@@ -17,7 +17,7 @@ beforeEach(function () {
     $this->travelTo(Carbon::create(2024, 1, 15)); // Freeze time
 });
 
-test('get monthly revenue analytics returns correct structure', function () {
+test('get monthly revenue analytics returns correct structure', function (): void {
     // Create test transactions
     for ($i = 1; $i <= 3; $i++) {
         createTransaction('markup', 100.00, Carbon::create(2024, 1, $i));
@@ -38,7 +38,7 @@ test('get monthly revenue analytics returns correct structure', function () {
     expect($analytics['total_revenue']['commission']['total_amount'])->toBe(150.00);
 });
 
-test('get revenue by date range with filters', function () {
+test('get revenue by date range with filters', function (): void {
     // Create transactions for different dates
     createTransaction('markup', 100.00, Carbon::create(2024, 1, 10));
     createTransaction('commission', 50.00, Carbon::create(2024, 1, 15));
@@ -58,7 +58,7 @@ test('get revenue by date range with filters', function () {
     expect($result['daily_revenue']['2024-01-20'])->toBeEmpty(); // convenience filtered out
 });
 
-test('get revenue by fee type with entity filter', function () {
+test('get revenue by fee type with entity filter', function (): void {
     $user1 = $this->mockEntity('User', 1);
     $user2 = $this->mockEntity('User', 2);
 
@@ -78,7 +78,7 @@ test('get revenue by fee type with entity filter', function () {
     expect($result['markup']['entity_count'])->toBe(1);
 });
 
-test('get entity revenue with pagination', function () {
+test('get entity revenue with pagination', function (): void {
     // Create multiple entities with transactions
     for ($i = 1; $i <= 15; $i++) {
         $user = $this->mockEntity('User', $i);
@@ -100,7 +100,7 @@ test('get entity revenue with pagination', function () {
     expect($result['pagination']['current_page'])->toBe(2);
 });
 
-test('get daily breakdown returns array indexed by day', function () {
+test('get daily breakdown returns array indexed by day', function (): void {
     // Create transactions on specific days
     createTransaction('markup', 100.00, Carbon::create(2024, 1, 5, 12, 0, 0)); // Add time
     createTransaction('markup', 200.00, Carbon::create(2024, 1, 5, 14, 0, 0)); // Same day
@@ -120,7 +120,7 @@ test('get daily breakdown returns array indexed by day', function () {
     expect($result['daily_breakdown']['markup'][5])->toBe(300.00); // Day 5 total
 });
 
-test('get comparative analysis shows percentage changes', function () {
+test('get comparative analysis shows percentage changes', function (): void {
     // Period 1 transactions
     createTransaction('markup', 100.00, Carbon::create(2024, 1, 1));
     createTransaction('commission', 50.00, Carbon::create(2024, 1, 1));
@@ -149,7 +149,7 @@ test('get comparative analysis shows percentage changes', function () {
     expect($result['comparison']['commission']['change']['direction'])->toBe('decrease');
 });
 
-test('get custom report with specific metrics', function () {
+test('get custom report with specific metrics', function (): void {
 
     createTransaction('markup', 100.00);
     createTransaction('markup', 200.00);
@@ -167,7 +167,7 @@ test('get custom report with specific metrics', function () {
     expect(round($ave, 2))->toBe(116.67); // 350 / 3
 });
 
-test('filters by item type work correctly', function () {
+test('filters by item type work correctly', function (): void {
     // Create fee rules with different item types
     $productRule = FeeRule::create([
         'entity_type' => null,
@@ -207,7 +207,7 @@ test('filters by item type work correctly', function () {
     expect($result['commission']['total_amount'])->toBe(0); // Filtered out
 });
 
-test('get top revenue generators returns sorted list', function () {
+test('get top revenue generators returns sorted list', function (): void {
     // Create entities with different revenue amounts
     $entities = [];
     for ($i = 1; $i <= 3; $i++) {
@@ -226,7 +226,7 @@ test('get top revenue generators returns sorted list', function () {
     expect($result['entities'][1]['total_revenue'])->toBe(200.00); // Second highest
 });
 
-test('get hourly breakdown identifies peak hours', function () {
+test('get hourly breakdown identifies peak hours', function (): void {
     // Create transactions at different hours
     createTransaction('markup', 100.00, Carbon::create(2024, 1, 1, 10, 0, 0));
     createTransaction('markup', 200.00, Carbon::create(2024, 1, 1, 10, 30, 0)); // Same hour

@@ -5,7 +5,7 @@ use Repay\Fee\Enums\FeeType;
 use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeTransaction;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->user = $this->mockEntity('User', 1);
     $this->merchant = $this->mockEntity('Merchant', 2);
     $this->order = $this->mockEntity('Order', 3);
@@ -15,7 +15,7 @@ beforeEach(function () {
     FeeRule::query()->delete();
 });
 
-test('fee transaction model can be created', function () {
+test('fee transaction model can be created', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->merchant),
         'entity_id' => $this->merchant->id,
@@ -60,7 +60,7 @@ test('fee transaction model can be created', function () {
         ->metadata->toBe(['test' => 'data']);
 });
 
-test('fee transaction model casts enums correctly', function () {
+test('fee transaction model casts enums correctly', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->merchant),
         'entity_id' => $this->merchant->id,
@@ -98,7 +98,7 @@ test('fee transaction model casts enums correctly', function () {
     expect($transaction->status->value)->toBe('applied');
 });
 
-test('fee transaction model relationships work correctly', function () {
+test('fee transaction model relationships work correctly', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->merchant),
         'entity_id' => $this->merchant->id,
@@ -134,7 +134,7 @@ test('fee transaction model relationships work correctly', function () {
     expect(method_exists($transaction, 'feeable'))->toBeTrue();
 });
 
-test('scope for fee bearer filters correctly', function () {
+test('scope for fee bearer filters correctly', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -182,7 +182,7 @@ test('scope for fee bearer filters correctly', function () {
         ->and($merchantTransactions->first()->transaction_id)->toBe('TXN-002');
 });
 
-test('scope for feeable filters correctly', function () {
+test('scope for feeable filters correctly', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -232,7 +232,7 @@ test('scope for feeable filters correctly', function () {
         ->and($order2Transactions->first()->transaction_id)->toBe('TXN-002');
 });
 
-test('scope with status filters correctly', function () {
+test('scope with status filters correctly', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -295,7 +295,7 @@ test('scope with status filters correctly', function () {
         ->and($reversedTransactions->first()->transaction_id)->toBe('TXN-003');
 });
 
-test('scope in date range filters correctly', function () {
+test('scope in date range filters correctly', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -364,7 +364,7 @@ test('scope in date range filters correctly', function () {
     expect($jan10To20->first()->transaction_id)->toBe('TXN-002');
 });
 
-test('applied_at is set automatically on creation', function () {
+test('applied_at is set automatically on creation', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -412,7 +412,7 @@ test('applied_at is set automatically on creation', function () {
         ->toBe($customDate->toDateTimeString());
 });
 
-test('metadata is properly cast to array', function () {
+test('metadata is properly cast to array', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,

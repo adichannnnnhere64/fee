@@ -7,7 +7,7 @@ use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeTransaction;
 use Repay\Fee\Services\FeeTransactionService;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->service = new FeeTransactionService;
     $this->user = $this->mockEntity('User', 1);
     $this->merchant = $this->mockEntity('Merchant', 2);
@@ -20,7 +20,7 @@ beforeEach(function () {
     FeeRule::query()->delete();
 });
 
-test('recordFee creates fee transaction with all required data', function () {
+test('recordFee creates fee transaction with all required data', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->merchant),
         'entity_id' => $this->merchant->id,
@@ -91,7 +91,7 @@ test('recordFee creates fee transaction with all required data', function () {
     expect($snapshot['entity_id'])->toBe($this->merchant->id);
 });
 
-test('recordFee generates transaction ID if not provided', function () {
+test('recordFee generates transaction ID if not provided', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -116,7 +116,7 @@ test('recordFee generates transaction ID if not provided', function () {
         ->toMatch('/^FEE-\d{14}-\d{4}$/');
 });
 
-test('recordFee works with different fee types', function () {
+test('recordFee works with different fee types', function (): void {
     $markupFee = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -182,7 +182,7 @@ test('recordFee works with different fee types', function () {
         ->and($convenienceTransaction->fee_amount)->toBe('5.0000');
 });
 
-test('reverseFee updates transaction status and adds reversal metadata', function () {
+test('reverseFee updates transaction status and adds reversal metadata', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -222,7 +222,7 @@ test('reverseFee updates transaction status and adds reversal metadata', functio
     expect($dbTransaction->status)->toBe(FeeTransactionStatus::REVERSED);
 });
 
-test('reverseFee preserves original metadata while adding reversal data', function () {
+test('reverseFee preserves original metadata while adding reversal data', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -264,7 +264,7 @@ test('reverseFee preserves original metadata while adding reversal data', functi
         ->reversal_reason->toBe('Refund requested');
 });
 
-test('getFeesForBearer returns paginated results', function () {
+test('getFeesForBearer returns paginated results', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -317,7 +317,7 @@ test('getFeesForBearer returns paginated results', function () {
     expect($userTransactionIds)->not()->toContain('TXN-MERCHANT-1');
 });
 
-test('getFeesForBearer applies status filter correctly', function () {
+test('getFeesForBearer applies status filter correctly', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -376,7 +376,7 @@ test('getFeesForBearer applies status filter correctly', function () {
         ->and($reversedFees->items()[0]->transaction_id)->toBe('TXN-TO-REVERSE');
 });
 
-test('getFeesForBearer applies date range filter correctly', function () {
+test('getFeesForBearer applies date range filter correctly', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -444,7 +444,7 @@ test('getFeesForBearer applies date range filter correctly', function () {
         ->and($febFirstHalf->items()[0]->transaction_id)->toBe('TXN-FEB01');
 });
 
-test('getFeesForBearer applies fee type filter correctly', function () {
+test('getFeesForBearer applies fee type filter correctly', function (): void {
     $markupFee = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -500,7 +500,7 @@ test('getFeesForBearer applies fee type filter correctly', function () {
         ->and($allFees->total())->toBe(5);
 });
 
-test('getFeesForBearer respects per_page parameter', function () {
+test('getFeesForBearer respects per_page parameter', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -539,7 +539,7 @@ test('getFeesForBearer respects per_page parameter', function () {
         ->count()->toBe(5);
 });
 
-test('getTotalFeesForBearer calculates correct totals', function () {
+test('getTotalFeesForBearer calculates correct totals', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -613,7 +613,7 @@ test('getTotalFeesForBearer calculates correct totals', function () {
         ->total_transaction_amount->toBe(600); // 100 + 200 + 300
 });
 
-test('getTotalFeesForBearer applies date range filter', function () {
+test('getTotalFeesForBearer applies date range filter', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -687,7 +687,7 @@ test('getTotalFeesForBearer applies date range filter', function () {
         ->total_transaction_amount->toBe(600); // 100 + 200 + 300
 });
 
-test('getTotalFeesForBearer applies fee type filter', function () {
+test('getTotalFeesForBearer applies fee type filter', function (): void {
     $markupFee = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -765,7 +765,7 @@ test('getTotalFeesForBearer applies fee type filter', function () {
         ->total_transaction_amount->toBe(600); // 300 + 300
 });
 
-test('getTotalFeesForBearer handles empty results gracefully', function () {
+test('getTotalFeesForBearer handles empty results gracefully', function (): void {
     $totals = $this->service->getTotalFeesForBearer($this->user);
 
     expect($totals)
@@ -774,7 +774,7 @@ test('getTotalFeesForBearer handles empty results gracefully', function () {
         ->total_transaction_amount->toBe(0);
 });
 
-test('transaction ID generation follows correct format', function () {
+test('transaction ID generation follows correct format', function (): void {
     // Mock the random_int function to get predictable results
     $service = new class extends FeeTransactionService
     {
@@ -826,7 +826,7 @@ test('transaction ID generation follows correct format', function () {
 /*         ->metadata['reason']->toBe('Manual adjustment'); */
 /* }); */
 /**/
-test('recordFee includes fee rule snapshot when fee rule exists', function () {
+test('recordFee includes fee rule snapshot when fee rule exists', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->merchant),
         'entity_id' => $this->merchant->id,

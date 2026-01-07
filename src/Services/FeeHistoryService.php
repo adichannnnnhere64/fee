@@ -102,14 +102,14 @@ class FeeHistoryService implements FeeHistoryInterface
     {
         // Example filter: by item_type
         if (isset($filters['item_type'])) {
-            $query->whereHas('feeRule', function ($q) use ($filters) {
+            $query->whereHas('feeRule', function ($q) use ($filters): void {
                 $q->where('item_type', $filters['item_type']);
             });
         }
 
         // Example filter: by fee_type
         if (isset($filters['fee_type'])) {
-            $query->whereHas('feeRule', function ($q) use ($filters) {
+            $query->whereHas('feeRule', function ($q) use ($filters): void {
                 $q->where('fee_type', $filters['fee_type']);
             });
         }

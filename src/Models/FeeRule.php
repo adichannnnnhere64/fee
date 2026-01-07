@@ -36,7 +36,7 @@ class FeeRule extends Model
 
     protected static function booted()
     {
-        static::saving(function (FeeRule $model) {
+        static::saving(function (FeeRule $model): void {
             $model->validateRules();
         });
     }
@@ -69,11 +69,11 @@ class FeeRule extends Model
         $now = now();
 
         return $query->where('is_active', true)
-            ->where(function ($q) use ($now) {
+            ->where(function ($q) use ($now): void {
                 $q->whereNull('effective_from')
                     ->orWhere('effective_from', '<=', $now);
             })
-            ->where(function ($q) use ($now) {
+            ->where(function ($q) use ($now): void {
                 $q->whereNull('effective_to')
                     ->orWhere('effective_to', '>', $now);
             })
@@ -131,7 +131,7 @@ class FeeRule extends Model
         return $query->where('is_active', true)
             ->whereNotNull('effective_from')
             ->where('effective_from', '>', $now)
-            ->where(function ($q) use ($now) {
+            ->where(function ($q) use ($now): void {
                 $q->whereNull('effective_to')
                     ->orWhere('effective_to', '>', $now);
             });
@@ -218,7 +218,7 @@ class FeeRule extends Model
             // Deactivate the old fee (set effective_to)
             $this->update([
                 'effective_to' => $effectiveFrom,
-                'replaced_by_fee_id' => $newFee->id
+                'replaced_by_fee_id' => $newFee->id,
             ]);
 
             // Log the change

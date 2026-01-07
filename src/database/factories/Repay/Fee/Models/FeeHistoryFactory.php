@@ -4,7 +4,6 @@
 
 namespace Database\Factories\Repay\Fee\Models;
 
-
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Repay\Fee\Models\FeeHistory;
 use Repay\Fee\Models\FeeRule;
@@ -16,7 +15,7 @@ class FeeHistoryFactory extends Factory
     public function definition(): array
     {
         $previousRule = FeeRule::factory()->create();
-        
+
         return [
             'fee_rule_id' => FeeRule::factory(),
             'previous_fee_rule_id' => $previousRule->id,
@@ -30,7 +29,6 @@ class FeeHistoryFactory extends Factory
             'effective_date' => $this->faker->dateTimeBetween('now', '+30 days'),
         ];
     }
-
 
     public function forRule(FeeRule $rule): self
     {

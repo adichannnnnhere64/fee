@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Repay\Fee\Models\FeeTransaction reverseFee(...$args)
  * @method static \Illuminate\Pagination\LengthAwarePaginator getFeesForBearer($bearer, array $filters = [])
  * @method static array getTotalFeesForBearer($bearer, array $filters = [])
- * 
+ *
  * Analytics Methods
  * @method static array getMonthlyRevenueAnalytics(int $year, int $month, array $filters = [])
  * @method static array getRevenueByDateRange(array $filters = [])

@@ -7,14 +7,14 @@ use Repay\Fee\Facades\Fee;
 use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeTransaction;
 
-beforeEach(function () {
+beforeEach(function (): void {
     FeeTransaction::query()->delete();
     FeeRule::query()->delete();
 
     $this->travelTo(Carbon::create(2024, 1, 15));
 });
 
-test('facade provides analytics methods', function () {
+test('facade provides analytics methods', function (): void {
     // Create some test data
     $user = $this->mockEntity('User', 1);
     createTransaction('markup', 100.00, Carbon::create(2024, 1, 10), $user);
@@ -83,7 +83,7 @@ test('facade provides analytics methods', function () {
     expect($custom['data']['total_transactions'])->toBe(2);
 });
 
-test('analytics handle empty results gracefully', function () {
+test('analytics handle empty results gracefully', function (): void {
     $monthly = Fee::getMonthlyRevenueAnalytics(2024, 1);
 
     expect($monthly['total_revenue']['markup']['total_amount'])->toBe(0);
@@ -93,7 +93,7 @@ test('analytics handle empty results gracefully', function () {
     expect(array_sum($monthly['daily_breakdown']['markup']))->toBe(0);
 });
 
-test('analytics respect status filters', function () {
+test('analytics respect status filters', function (): void {
     $user = $this->mockEntity('User', 1);
 
     // Applied transaction

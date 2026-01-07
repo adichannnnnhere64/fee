@@ -4,7 +4,7 @@ use Repay\Fee\Facades\Fee;
 use Repay\Fee\Models\FeeHistory;
 use Repay\Fee\Models\FeeRule;
 
-test('merchants inherit global fees but can override with specific fees', function () {
+test('merchants inherit global fees but can override with specific fees', function (): void {
     // Create 5 merchants
     $merchants = [];
     for ($i = 1; $i <= 5; $i++) {
@@ -91,7 +91,6 @@ test('merchants inherit global fees but can override with specific fees', functi
 
     $activeFee = app('fee.service')->getActiveFeeFor($merchants[3], 'product');
 
-
     // Also check what global fees are available
     $globalFees = FeeRule::global()
         ->forItemType('product')
@@ -126,7 +125,7 @@ test('merchants inherit global fees but can override with specific fees', functi
     expect($merchant1Upcoming['product'])->toBeNull();
 });
 
-test('service fee inheritance works similarly', function () {
+test('service fee inheritance works similarly', function (): void {
     config(['cache.default' => 'array']);
     // Create merchants
     $merchant1 = $this->mockEntity('Merchant', 1);
@@ -151,7 +150,7 @@ test('service fee inheritance works similarly', function () {
         'calculation_type' => 'fixed',
         'is_active' => false,
     ]);
-	/* dd($globalCommission); */
+    /* dd($globalCommission); */
 
     /* Fee::logFeeChange($globalConvenience, [], 'Global convenience created'); */
 
@@ -194,22 +193,21 @@ test('service fee inheritance works similarly', function () {
     expect($calc3['fee_amount'])->toEqualWithDelta(7.00, 2);
     expect($calc3['fee_rule']['fee_type'])->toBe('commission');
 
-	cache()->purge();
+    cache()->purge();
     // Step 5: Deactivate merchant 2's commission
     /* $specificCommission->update(['is_active' => false]); */
-   $specificCommission->revertToGlobal(
+    $specificCommission->revertToGlobal(
         effectiveFrom: now(),
         reason: 'End of promotional period'
     );
     Fee::logFeeChange($specificCommission, $specificCommission->toArray(), 'Deactivated commission');
 
-	/* dd(FeeHistory::query()->get()); */
+    /* dd(FeeHistory::query()->get()); */
     // Merchant 2 should fall back to specific convenience
     $calc4 = Fee::calculateFor($merchant2, 100.00, 'service');
     expect($calc4['fee_amount'])->toBe(15.00)
         ->and($calc4['fee_rule']['fee_type'])->toBe('commission');
-        /* ->and($calc4['fee_rule']['is_global'])->toBeTrue(); */
-
+    /* ->and($calc4['fee_rule']['is_global'])->toBeTrue(); */
 
     // Step 6: Deactivate merchant 2's convenience
     $specificConvenience->update(['is_active' => false]);
@@ -219,11 +217,11 @@ test('service fee inheritance works similarly', function () {
     $calc5 = Fee::calculateFor($merchant2, 100.00, 'service');
     expect($calc5['fee_amount'])->toBe(15.00)
         ->and($calc5['fee_rule']['fee_type'])->toBe('commission');
-        /* ->and($calc5['fee_rule']['is_global'])->toBeTrue(); */
+    /* ->and($calc5['fee_rule']['is_global'])->toBeTrue(); */
 
 });
 
-test('multiple fee updates with effective dates', function () {
+test('multiple fee updates with effective dates', function (): void {
     $merchant = $this->mockEntity('Merchant', 1);
 
     // Freeze time
@@ -301,7 +299,6 @@ test('multiple fee updates with effective dates', function () {
     $calc2 = Fee::calculateFor($merchant, 100.00, 'product');
     // Before traveling, debug
 
-
     // Travel
     $this->travelTo($now->copy()->addDays(6));
 
@@ -332,7 +329,7 @@ test('multiple fee updates with effective dates', function () {
     expect($upcoming4['product']->id)->toBe($specific2->id);
 });
 
-test('fee inheritance with mixed item types', function () {
+test('fee inheritance with mixed item types', function (): void {
     $merchant = $this->mockEntity('Merchant', 1);
 
     // Create global fees for both product and service

@@ -45,7 +45,7 @@ class TestCase extends Orchestra
     /**
      * Create a mock entity for testing
      */
-        protected function mockEntity(string $modelName = 'User', int $id = 1)
+    protected function mockEntity(string $modelName = 'User', int $id = 1)
     {
         return new class($modelName, $id)
         {
@@ -72,7 +72,7 @@ class TestCase extends Orchestra
         };
     }
 
-	   protected function createActiveFeeRule(array $data = []): \Repay\Fee\Models\FeeRule
+    protected function createActiveFeeRule(array $data = []): \Repay\Fee\Models\FeeRule
     {
         return \Repay\Fee\Models\FeeRule::create(array_merge([
             'entity_type' => null,
@@ -90,7 +90,7 @@ class TestCase extends Orchestra
     protected function createFeeHistory(array $data = []): \Repay\Fee\Models\FeeHistory
     {
         $feeRule = $this->createActiveFeeRule();
-        
+
         return \Repay\Fee\Models\FeeHistory::create(array_merge([
             'fee_rule_id' => $feeRule->id,
             'entity_type' => $feeRule->entity_type,
@@ -102,14 +102,3 @@ class TestCase extends Orchestra
         ], $data));
     }
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -8,10 +8,10 @@ enum FeeTransactionStatus: string
     case APPLIED = 'applied';
     case REVERSED = 'reversed';
     case FAILED = 'failed';
-    
+
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => 'Pending',
             self::APPLIED => 'Applied',
             self::REVERSED => 'Reversed',

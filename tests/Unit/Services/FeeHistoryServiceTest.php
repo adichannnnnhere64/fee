@@ -1,21 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Cache;
-use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeHistory;
+use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Services\FeeHistoryService;
 
-beforeEach(function () {
-    $this->service = new FeeHistoryService();
+beforeEach(function (): void {
+    $this->service = new FeeHistoryService;
     $this->user = $this->mockEntity('User', 1);
     $this->merchant = $this->mockEntity('Merchant', 1);
-    
+
     // Clear existing data
     FeeRule::query()->delete();
     FeeHistory::query()->delete();
 });
 
-test('getForEntity returns paginated history for entity', function () {
+test('getForEntity returns paginated history for entity', function (): void {
     // Create fee rule for entity
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->user),
@@ -27,7 +27,7 @@ test('getForEntity returns paginated history for entity', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     // Create history entries
     for ($i = 1; $i <= 5; $i++) {
         FeeHistory::create([
@@ -40,9 +40,9 @@ test('getForEntity returns paginated history for entity', function () {
             'reason' => "Update {$i}",
         ]);
     }
-    
+
     $result = $this->service->getForEntity($this->user);
-    
+
     expect($result)
         ->toBeArray()
         ->toHaveKeys(['data', 'current_page', 'per_page', 'total'])
@@ -51,7 +51,7 @@ test('getForEntity returns paginated history for entity', function () {
         ->per_page->toBe(15);
 });
 
-test('getForEntity respects per_page filter', function () {
+test('getForEntity respects per_page filter', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -62,7 +62,7 @@ test('getForEntity respects per_page filter', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     for ($i = 1; $i <= 10; $i++) {
         FeeHistory::create([
             'fee_rule_id' => $feeRule->id,
@@ -74,15 +74,15 @@ test('getForEntity respects per_page filter', function () {
             'reason' => "Update {$i}",
         ]);
     }
-    
+
     $result = $this->service->getForEntity($this->user, ['per_page' => 3]);
-    
+
     expect($result)
         ->data->toHaveCount(3)
         ->per_page->toBe(3);
 });
 
-test('getForEntity filters by item_type', function () {
+test('getForEntity filters by item_type', function (): void {
     $feeRule1 = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -93,7 +93,7 @@ test('getForEntity filters by item_type', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     $feeRule2 = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -104,7 +104,7 @@ test('getForEntity filters by item_type', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     // Create 3 product histories
     for ($i = 1; $i <= 3; $i++) {
         FeeHistory::create([
@@ -117,7 +117,7 @@ test('getForEntity filters by item_type', function () {
             'reason' => "Product update {$i}",
         ]);
     }
-    
+
     // Create 2 service histories
     for ($i = 1; $i <= 2; $i++) {
         FeeHistory::create([
@@ -130,17 +130,17 @@ test('getForEntity filters by item_type', function () {
             'reason' => "Service update {$i}",
         ]);
     }
-    
+
     // Filter by product
     $productResult = $this->service->getForEntity($this->user, ['item_type' => 'product']);
     expect($productResult['data'])->toHaveCount(3);
-    
+
     // Filter by service
     $serviceResult = $this->service->getForEntity($this->user, ['item_type' => 'service']);
     expect($serviceResult['data'])->toHaveCount(2);
 });
 
-test('getForEntity filters by fee_type', function () {
+test('getForEntity filters by fee_type', function (): void {
     $feeRule1 = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -151,7 +151,7 @@ test('getForEntity filters by fee_type', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     $feeRule2 = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -162,7 +162,7 @@ test('getForEntity filters by fee_type', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     FeeHistory::create([
         'fee_rule_id' => $feeRule1->id,
         'entity_type' => get_class($this->user),
@@ -172,7 +172,7 @@ test('getForEntity filters by fee_type', function () {
         'new_data' => $feeRule1->toArray(),
         'reason' => 'Commission update',
     ]);
-    
+
     FeeHistory::create([
         'fee_rule_id' => $feeRule2->id,
         'entity_type' => get_class($this->user),
@@ -182,15 +182,15 @@ test('getForEntity filters by fee_type', function () {
         'new_data' => $feeRule2->toArray(),
         'reason' => 'Convenience update',
     ]);
-    
+
     $commissionResult = $this->service->getForEntity($this->user, ['fee_type' => 'commission']);
     expect($commissionResult['data'])->toHaveCount(1);
-    
+
     $convenienceResult = $this->service->getForEntity($this->user, ['fee_type' => 'convenience']);
     expect($convenienceResult['data'])->toHaveCount(1);
 });
 
-test('getForEntity filters by date range', function () {
+test('getForEntity filters by date range', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -201,7 +201,7 @@ test('getForEntity filters by date range', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     // Create histories on different dates
     $history1 = FeeHistory::create([
         'fee_rule_id' => $feeRule->id,
@@ -213,7 +213,7 @@ test('getForEntity filters by date range', function () {
         'reason' => 'Created',
         'created_at' => '2024-01-01 10:00:00',
     ]);
-    
+
     $history2 = FeeHistory::create([
         'fee_rule_id' => $feeRule->id,
         'entity_type' => get_class($this->user),
@@ -224,7 +224,7 @@ test('getForEntity filters by date range', function () {
         'reason' => 'Updated',
         'created_at' => '2024-01-15 10:00:00',
     ]);
-    
+
     $history3 = FeeHistory::create([
         'fee_rule_id' => $feeRule->id,
         'entity_type' => get_class($this->user),
@@ -235,19 +235,19 @@ test('getForEntity filters by date range', function () {
         'reason' => 'Deactivated',
         'created_at' => '2024-01-30 10:00:00',
     ]);
-    
+
     // Filter by start date (>= Jan 15)
     $result1 = $this->service->getForEntity($this->user, ['start_date' => '2024-01-15']);
     expect($result1['data'])->toHaveCount(2); // Jan 15 and Jan 30
-    
+
     // Verify correct entries
     $ids1 = collect($result1['data'])->pluck('id')->toArray();
     expect($ids1)->toContain($history2->id, $history3->id);
-    
+
     // Filter by end date (<= Jan 15)
     $result2 = $this->service->getForEntity($this->user, ['end_date' => '2024-01-15']);
     expect($result2['data'])->toHaveCount(2); // Jan 1 and Jan 15
-    
+
     // Filter by both (Jan 10 - Jan 20)
     $result3 = $this->service->getForEntity($this->user, [
         'start_date' => '2024-01-10',
@@ -257,8 +257,7 @@ test('getForEntity filters by date range', function () {
     expect($result3['data'][0]['id'])->toBe($history2->id);
 });
 
-
-test('getGlobal returns paginated global history', function () {
+test('getGlobal returns paginated global history', function (): void {
     // Create global fee rule
     $feeRule = FeeRule::create([
         'entity_type' => null,
@@ -270,7 +269,7 @@ test('getGlobal returns paginated global history', function () {
         'is_active' => true,
         'is_global' => true,
     ]);
-    
+
     // Create global history entries
     for ($i = 1; $i <= 4; $i++) {
         FeeHistory::create([
@@ -283,7 +282,7 @@ test('getGlobal returns paginated global history', function () {
             'reason' => "Global update {$i}",
         ]);
     }
-    
+
     // Create entity-specific history (should not appear in global results)
     $entityFeeRule = FeeRule::create([
         'entity_type' => get_class($this->user),
@@ -295,7 +294,7 @@ test('getGlobal returns paginated global history', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     FeeHistory::create([
         'fee_rule_id' => $entityFeeRule->id,
         'entity_type' => get_class($this->user),
@@ -305,15 +304,15 @@ test('getGlobal returns paginated global history', function () {
         'new_data' => $entityFeeRule->toArray(),
         'reason' => 'Entity-specific update',
     ]);
-    
+
     $result = $this->service->getGlobal();
-    
+
     expect($result)
         ->toBeArray()
         ->data->toHaveCount(4); // Only global entries
 });
 
-test('getGlobal respects filters', function () {
+test('getGlobal respects filters', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -324,7 +323,7 @@ test('getGlobal respects filters', function () {
         'is_active' => true,
         'is_global' => true,
     ]);
-    
+
     for ($i = 1; $i <= 3; $i++) {
         FeeHistory::create([
             'fee_rule_id' => $feeRule->id,
@@ -336,18 +335,18 @@ test('getGlobal respects filters', function () {
             'reason' => "Update {$i}",
         ]);
     }
-    
+
     $result = $this->service->getGlobal([
         'fee_type' => 'commission',
         'per_page' => 2,
     ]);
-    
+
     expect($result)
         ->data->toHaveCount(2)
         ->per_page->toBe(2);
 });
 
-test('logChange creates history entry', function () {
+test('logChange creates history entry', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -358,14 +357,14 @@ test('logChange creates history entry', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     $oldData = $feeRule->toArray();
     $feeRule->update(['value' => 15.0]);
-    
+
     $this->service->logChange($feeRule, $oldData, 'Rate increased from 10% to 15%');
-    
+
     $history = FeeHistory::latest()->first();
-    
+
     expect($history)
         ->not()->toBeNull()
         ->fee_rule_id->toBe($feeRule->id)
@@ -377,7 +376,7 @@ test('logChange creates history entry', function () {
         ->reason->toBe('Rate increased from 10% to 15%');
 });
 
-test('logChange with empty oldData creates "created" action', function () {
+test('logChange with empty oldData creates "created" action', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -388,21 +387,20 @@ test('logChange with empty oldData creates "created" action', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     $this->service->logChange($feeRule, [], 'New fee created');
-    
+
     $history = FeeHistory::latest()->first();
-    
+
     expect($history)
         ->action->toBe('created')
         ->old_data->toBe([])
         ->reason->toBe('New fee created');
 });
 
-
-test('caching works for getForEntity', function () {
+test('caching works for getForEntity', function (): void {
     config(['fee.cache.enabled' => true]);
-    
+
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -413,7 +411,7 @@ test('caching works for getForEntity', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     // Create initial history
     FeeHistory::create([
         'fee_rule_id' => $feeRule->id,
@@ -424,11 +422,11 @@ test('caching works for getForEntity', function () {
         'new_data' => $feeRule->toArray(),
         'reason' => 'Created',
     ]);
-    
+
     // First call should cache (1 item)
     $result1 = $this->service->getForEntity($this->user);
     expect($result1['data'])->toHaveCount(1);
-    
+
     // Add more history
     FeeHistory::create([
         'fee_rule_id' => $feeRule->id,
@@ -439,26 +437,24 @@ test('caching works for getForEntity', function () {
         'new_data' => ['value' => 15.0],
         'reason' => 'Updated',
     ]);
-    
+
     // Should still get cached result (1 item)
     $result2 = $this->service->getForEntity($this->user);
     expect($result2['data'])->toHaveCount(1);
-    
+
     // Clear cache by logging a change - use proper old data
     $oldData = $feeRule->toArray();
     $this->service->logChange($feeRule, $oldData, 'Clearing cache');
-    
-    // Should now get fresh result: 
+
+    // Should now get fresh result:
     // Original create (1) + update (1) + logChange (1) = 3 items
     $result3 = $this->service->getForEntity($this->user);
     expect($result3['data'])->toHaveCount(3);
 });
 
-
-
-test('caching works for getGlobal', function () {
+test('caching works for getGlobal', function (): void {
     config(['fee.cache.enabled' => true]);
-    
+
     $feeRule = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -469,7 +465,7 @@ test('caching works for getGlobal', function () {
         'is_active' => true,
         'is_global' => true,
     ]);
-    
+
     FeeHistory::create([
         'fee_rule_id' => $feeRule->id,
         'entity_type' => null,
@@ -479,11 +475,11 @@ test('caching works for getGlobal', function () {
         'new_data' => $feeRule->toArray(),
         'reason' => 'Global created',
     ]);
-    
+
     // First call
     $result1 = $this->service->getGlobal();
     expect($result1['data'])->toHaveCount(1);
-    
+
     // Add more
     FeeHistory::create([
         'fee_rule_id' => $feeRule->id,
@@ -494,14 +490,14 @@ test('caching works for getGlobal', function () {
         'new_data' => ['value' => 15.0],
         'reason' => 'Global updated',
     ]);
-    
+
     // Should still be cached
     $result2 = $this->service->getGlobal();
     expect($result2['data'])->toHaveCount(1);
-    
+
     // Log change to clear cache
     $this->service->logChange($feeRule, [], 'Clear global cache');
-    
+
     // Should get fresh
     $result3 = $this->service->getGlobal();
     expect($result3['data'])->toHaveCount(3);
@@ -576,8 +572,7 @@ test('caching works for getGlobal', function () {
 /*     expect($result6['data'])->toHaveCount(6); */
 /* }); */
 
-
-test('history includes feeRule relationship when requested', function () {
+test('history includes feeRule relationship when requested', function (): void {
     $feeRule = FeeRule::create([
         'entity_type' => get_class($this->user),
         'entity_id' => $this->user->id,
@@ -588,7 +583,7 @@ test('history includes feeRule relationship when requested', function () {
         'is_active' => true,
         'is_global' => false,
     ]);
-    
+
     FeeHistory::create([
         'fee_rule_id' => $feeRule->id,
         'entity_type' => get_class($this->user),
@@ -598,9 +593,9 @@ test('history includes feeRule relationship when requested', function () {
         'new_data' => $feeRule->toArray(),
         'reason' => 'Created',
     ]);
-    
+
     $result = $this->service->getForEntity($this->user);
-    
+
     expect($result['data'][0])
         ->toHaveKey('fee_rule')
         ->fee_rule->toHaveKeys(['id', 'item_type', 'fee_type', 'value']);

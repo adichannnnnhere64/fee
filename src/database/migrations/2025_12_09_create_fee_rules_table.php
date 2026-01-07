@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('fee_rules', function (Blueprint $table) {
+        Schema::create('fee_rules', function (Blueprint $table): void {
             $table->id();
             $table->nullableMorphs('entity');
             $table->enum('item_type', ['product', 'service']);
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->index(['effective_from', 'effective_to']);
         });
 
-        Schema::create('fee_histories', function (Blueprint $table) {
+        Schema::create('fee_histories', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('fee_rule_id')->constrained()->cascadeOnDelete();
             $table->nullableMorphs('entity');

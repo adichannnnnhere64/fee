@@ -265,8 +265,6 @@ class AnalyticsService implements AnalyticsInterface
         // Ensure it's at least 1
         $daysInPeriod = max(1, $daysInPeriod);
 
-
-
         $dailyBreakdown = [];
         $feeTypes = $filter->feeTypes ?: array_column(FeeType::cases(), 'value');
 
@@ -299,8 +297,6 @@ class AnalyticsService implements AnalyticsInterface
             ->orderBy('fee_type')
             ->get();
 
-
-
         foreach ($dailyData as $data) {
             $day = (int) $data->day;
             $feeType = $data->fee_type;
@@ -313,7 +309,7 @@ class AnalyticsService implements AnalyticsInterface
         $dailyTotals = [];
         for ($day = 1; $day <= $daysInPeriod; $day++) {
             $dailyTotals[$day] = 0;
-            foreach ($dailyBreakdown as $feeType => $dailyData) {
+            foreach ($dailyBreakdown as $dailyData) {
                 $dailyTotals[$day] += $dailyData[$day];
             }
         }
@@ -475,7 +471,7 @@ class AnalyticsService implements AnalyticsInterface
         }
 
         if ($filter->itemType) {
-            $query->whereHas('feeRule', function ($q) use ($filter) {
+            $query->whereHas('feeRule', function ($q) use ($filter): void {
                 $q->where('item_type', $filter->itemType);
             });
         }
@@ -598,7 +594,7 @@ class AnalyticsService implements AnalyticsInterface
         $totalPeriod1 = 0;
         $totalPeriod2 = 0;
 
-        foreach ($comparison as $feeType => $data) {
+        foreach ($comparison as $data) {
             $totalPeriod1 += $data['period_1']['total_amount'];
             $totalPeriod2 += $data['period_2']['total_amount'];
             $totalChangeAmount += $data['change']['amount'];
