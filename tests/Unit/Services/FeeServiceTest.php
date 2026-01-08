@@ -380,22 +380,6 @@ test('isCurrentlyActive returns false for future effective date', function (): v
     expect($fee->isCurrentlyActive())->toBeFalse();
 });
 
-test('isCurrentlyActive returns false for expired fee', function (): void {
-    $fee = FeeRule::create([
-        'entity_type' => get_class($this->user),
-        'entity_id' => $this->user->getKey(),
-        'item_type' => 'product',
-        'fee_type' => 'markup',
-        'value' => 10.0,
-        'calculation_type' => 'percentage',
-        'is_active' => true,
-        'is_global' => false,
-        'effective_to' => now()->subDay(),
-    ]);
-
-    expect($fee->isCurrentlyActive())->toBeFalse();
-});
-
 test('multiple entities can have separate fees', function (): void {
     $user1 = $this->mockEntity('User', 1);
     $user2 = $this->mockEntity('User', 2);

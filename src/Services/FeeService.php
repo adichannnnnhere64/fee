@@ -4,6 +4,7 @@ namespace Repay\Fee\Services;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Repay\Fee\DTO\CreateFee;
 use Repay\Fee\Models\FeeRule;
 
 class FeeService
@@ -33,11 +34,18 @@ class FeeService
         });
     }
 
-    public function setFeeForEntity(array $data, $entity): FeeRule
+    public function setFeeForEntity(array|CreateFee $data, $entity): FeeRule
     {
-        $itemType = $data['item_type'];
+        // Convert array to DTO if needed
+        $dto = $data instanceof CreateFee
+            ? $data
+
+            : CreateFee::fromArray($data);
+
+        $itemType = $dto->itemType;
 
         // Find existing active fee for this entity and item type
+
         $existingFee = FeeRule::forEntity($entity)
             ->forItemType($itemType)
             ->active()
@@ -48,48 +56,52 @@ class FeeService
             $existingFee->update(['is_active' => false]);
         }
 
-        // Create new fee
-        $fee = FeeRule::create(array_merge($data, [
+        // Create new fee using DTO's database array
+        $fee = FeeRule::create(array_merge($dto->toDatabaseArray(), [
+
             'entity_type' => get_class($entity),
             'entity_id' => $entity->getKey(),
+
             'is_global' => false,
         ]));
 
         $this->clearCacheForEntity($entity);
 
-        // Log the change
+        // Log the change using DTO's reason
+        $logReason = $dto->getReason();
+
         if ($existingFee) {
-            // This is an update/replacement
-            app('fee.history')->logChange(
-                $fee,
-                $existingFee->toArray(),
-                $existingFee->is_active ? 'Replaced active fee' : 'Created new fee'
-            );
-        } else {
-            // This is a new fee creation
-            app('fee.history')->logChange(
-                $fee,
-                [],
-                'Created new fee'
-            );
+            $logReason = $existingFee->is_active ? 'Replaced active fee' : $logReason;
         }
+
+        app('fee.history')->logChange(
+            $fee,
+            $existingFee?->toArray() ?? [],
+            $logReason
+        );
 
         return $fee;
     }
 
-    public function createGlobalFee(array $data): FeeRule
+    public function createGlobalFee(array|CreateFee $data): FeeRule
     {
-        $fee = FeeRule::create(array_merge($data, [
+        // Convert array to DTO if needed
+        $dto = $data instanceof CreateFee
+            ? $data
+            : CreateFee::fromArray($data);
+
+        // Create fee using DTO's database array
+        $fee = FeeRule::create(array_merge($dto->toDatabaseArray(), [
             'is_global' => true,
             'entity_type' => null,
             'entity_id' => null,
+
         ]));
 
-        // Log the creation
         app('fee.history')->logChange(
             $fee,
             [],
-            'Created global fee'
+            $dto->getReason()
         );
 
         return $fee;

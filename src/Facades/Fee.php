@@ -3,11 +3,12 @@
 namespace Repay\Fee\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use Repay\Fee\DTO\CreateFee;
 
 /**
  * @method static \Repay\Fee\Models\FeeRule getActiveFeeFor($entity, string $itemType)
- * @method static \Repay\Fee\Models\FeeRule setFeeForEntity(array $data, $entity)
- * @method static \Repay\Fee\Models\FeeRule createGlobalFee(array $data)
+ * @method static \Repay\Fee\Models\FeeRule setFeeForEntity(array|CreateFee $data, $entity)
+ * @method static \Repay\Fee\Models\FeeRule createGlobalFee(array|CreateFee $data)
  * @method static array calculateFor($entity, float $amount, string $itemType)
  * @method static \Illuminate\Support\Collection getAllActiveFeesFor($entity)
  * @method static \Illuminate\Support\Collection getGlobalFees()

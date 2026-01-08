@@ -1,0 +1,65 @@
+<?php
+
+namespace Repay\Fee\DTO;
+
+use Carbon\Carbon;
+use Repay\Fee\Enums\FeeType;
+
+class CreateFee
+{
+    public function __construct(
+        public string $itemType,
+        public FeeType $feeType,
+        public float $value,
+        public string $calculationType = 'percentage',
+        public bool $isActive = true,
+        public ?Carbon $effectiveFrom = null,
+        public ?string $reason = null
+    ) {
+        $this->validate();
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            itemType: $data['item_type'],
+            feeType: FeeType::from($data['fee_type']),
+            value: (float) $data['value'],
+            calculationType: $data['calculation_type'] ?? 'percentage',
+            isActive: $data['is_active'] ?? true,
+            effectiveFrom: isset($data['effective_from'])
+                ? Carbon::parse($data['effective_from'])
+                : null,
+            reason: $data['reason'] ?? null
+        );
+    }
+
+    public function toDatabaseArray(): array
+    {
+        return [
+            'item_type' => $this->itemType,
+            'fee_type' => $this->feeType->value,
+            'value' => $this->value,
+            'calculation_type' => $this->calculationType,
+            'is_active' => $this->isActive,
+            'effective_from' => $this->effectiveFrom?->toDateTimeString(),
+        ];
+    }
+
+    public function getReason(): string
+    {
+        return $this->reason ?? 'Created new fee';
+    }
+
+    protected function validate(): void
+    {
+        if (! in_array($this->calculationType, ['percentage', 'fixed'])) {
+            throw new \InvalidArgumentException("Calculation type must be 'percentage' or 'fixed'");
+        }
+
+        if ($this->value < 0) {
+            throw new \InvalidArgumentException('Fee value cannot be negative');
+        }
+
+    }
+}

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
+use Repay\Fee\Enums\CalculationType;
 
 class FeeRule extends Model
 {
@@ -23,7 +24,6 @@ class FeeRule extends Model
         'is_global',
         'effective_from',
         'created_at',
-        'effective_to',
     ];
 
     protected $casts = [
@@ -31,7 +31,6 @@ class FeeRule extends Model
         'is_active' => 'boolean',
         'is_global' => 'boolean',
         'effective_from' => 'datetime',
-        'effective_to' => 'datetime',
     ];
 
     protected static function booted()
@@ -73,10 +72,10 @@ class FeeRule extends Model
                 $q->whereNull('effective_from')
                     ->orWhere('effective_from', '<=', $now);
             })
-            ->where(function ($q) use ($now): void {
-                $q->whereNull('effective_to')
-                    ->orWhere('effective_to', '>', $now);
-            })
+            /* ->where(function ($q) use ($now): void { */
+            /*     $q->whereNull('effective_to') */
+            /*         ->orWhere('effective_to', '>', $now); */
+            /* }) */
             ->orderBy('effective_from', 'desc') // Most recent first
             ->limit(1); // Get only the most recent
     }
@@ -116,9 +115,9 @@ class FeeRule extends Model
             return false;
         }
 
-        if ($this->effective_to && $this->effective_to <= $now) {
-            return false;
-        }
+        /* if ($this->effective_to && $this->effective_to <= $now) { */
+        /*     return false; */
+        /* } */
 
         return true;
     }
@@ -130,11 +129,11 @@ class FeeRule extends Model
 
         return $query->where('is_active', true)
             ->whereNotNull('effective_from')
-            ->where('effective_from', '>', $now)
-            ->where(function ($q) use ($now): void {
-                $q->whereNull('effective_to')
-                    ->orWhere('effective_to', '>', $now);
-            });
+            ->where('effective_from', '>', $now);
+        /* ->where(function ($q) use ($now): void { */
+        /*     $q->whereNull('effective_to') */
+        /*         ->orWhere('effective_to', '>', $now); */
+        /* }); */
     }
 
     public function calculate(float $amount): float
@@ -217,7 +216,7 @@ class FeeRule extends Model
 
             // Deactivate the old fee (set effective_to)
             $this->update([
-                'effective_to' => $effectiveFrom,
+                /* 'effective_to' => $effectiveFrom, */
                 'replaced_by_fee_id' => $newFee->id,
             ]);
 
