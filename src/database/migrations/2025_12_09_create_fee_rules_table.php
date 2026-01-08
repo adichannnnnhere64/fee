@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->boolean('is_global')->default(false);
             $table->timestamp('effective_from')->nullable();
-            $table->timestamp('effective_to')->nullable();
+            /* $table->timestamp('effective_to')->nullable(); */
             $table->timestamps();
 
             $table->index(['entity_type', 'entity_id', 'item_type', 'is_active']);
