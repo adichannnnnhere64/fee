@@ -1,67 +1,67 @@
 {
-	"name": "repay/fee",
-	"description": "Flexible fee markup system for Laravel",
-	"keywords": ["laravel", "fee", "markup", "commission", "pricing"],
-	"homepage": "https://github.com/repay/fee",
-	"license": "MIT",
-	"type": "library",
-	"authors": [
-		{
-			"name": "Adrian Radores",
-			"email": "aradores@repay.ph",
-			"role": "Developer"
-		}
-	],
-	"require": {
-		"php": "^8.3",
-		"illuminate/support": "^12.0",
-		"illuminate/database": "^12.0",
-		"illuminate/cache": "^12.0"
-	},
-	"require-dev": {
-		"orchestra/testbench": "^10.8.0",
-		"driftingly/rector-laravel": "^2.1.3",
-		"fakerphp/faker": "^1.24.1",
-		"laravel/tinker": ">=2.10.2",
-		"larastan/larastan": "^3.8.0",
-		"laravel/boost": "^1.8.3",
-		"laravel/pail": "^1.2.4",
-		"laravel/pint": "^1.26.0",
-		"mockery/mockery": "^1.6.12",
-		"nunomaduro/collision": "^8.8.3",
-		"pestphp/pest": "^4.1.5",
-		"pestphp/pest-plugin-browser": "^4.1.1",
-		"pestphp/pest-plugin-laravel": "^4.0.0",
-		"pestphp/pest-plugin-type-coverage": "^4.0.3",
-		"rector/rector": "^2.2.8"
-	},
-	"autoload": {
-		"psr-4": {
-			"Repay\\Fee\\": "src/",
-             	        "Database\\Factories\\": "src/database/factories/"
-		}
-	},
-	"autoload-dev": {
-		"psr-4": {
-			"Repay\\Fee\\Tests\\": "tests/"
-		}
-	},
-	"scripts": {
-		"test": "vendor/bin/pest",
-		"test-coverage": "vendor/bin/pest --coverage-html coverage"
-	},
-	"config": {
-		"sort-packages": true,
-		"allow-plugins": {
-			"pestphp/pest-plugin": true
-		}
-	},
-	"extra": {
-		"laravel": {
-			"providers": ["Repay\\Fee\\FeeServiceProvider"],
-			"aliases": {
-				"Fee": "Repay\\Fee\\Facades\\Fee"
-			}
-		}
-	}
+    "name": "repay/fee",
+    "description": "Flexible fee markup system for Laravel",
+    "keywords": ["laravel", "fee", "markup", "commission", "pricing"],
+    "homepage": "https://github.com/repay/fee",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Adrian Radores",
+            "email": "aradores@repay.ph",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^12.0",
+        "illuminate/database": "^12.0",
+        "illuminate/cache": "^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.8.0",
+        "driftingly/rector-laravel": "^2.1.3",
+        "fakerphp/faker": "^1.24.1",
+        "laravel/tinker": ">=2.10.2",
+        "larastan/larastan": "^3.8.0",
+        "laravel/boost": "^1.8.3",
+        "laravel/pail": "^1.2.4",
+        "laravel/pint": "^1.26.0",
+        "mockery/mockery": "^1.6.12",
+        "nunomaduro/collision": "^8.8.3",
+        "pestphp/pest": "^4.1.5",
+        "pestphp/pest-plugin-browser": "^4.1.1",
+        "pestphp/pest-plugin-laravel": "^4.0.0",
+        "pestphp/pest-plugin-type-coverage": "^4.0.3",
+        "rector/rector": "^2.2.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Repay\\Fee\\": "src/",
+            "Database\\Factories\\": "src/database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Repay\\Fee\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": ["Repay\\Fee\\FeeServiceProvider"],
+            "aliases": {
+                "Fee": "Repay\\Fee\\Facades\\Fee"
+            }
+        }
+    }
 }
