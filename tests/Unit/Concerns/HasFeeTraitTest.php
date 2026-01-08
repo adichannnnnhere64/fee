@@ -4,6 +4,7 @@ namespace Repay\Fee\Tests\Unit\Concerns;
 
 use Illuminate\Database\Eloquent\Model;
 use Repay\Fee\Contracts\FeeableInterface;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeTransaction;
 use Repay\Fee\Tests\Fixtures\Merchant;
@@ -98,7 +99,7 @@ test('fee rule attribute returns fee rule when exists', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -116,7 +117,7 @@ test('fee attribute calculates correctly when fee rule exists', function (): voi
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
 	'effective_from' => now()->subDays(2)
@@ -133,7 +134,7 @@ test('total with fee attribute includes calculated fee', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -162,7 +163,7 @@ test('fee attribute uses transaction amount when exists', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -194,7 +195,7 @@ test('trait works with fixed fee calculation', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 5.0, // Fixed amount
-        'calculation_type' => 'fixed',
+        'calculation_type' => CalculationType::FLAT,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -259,7 +260,7 @@ test('trait handles service item type', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);

@@ -3,6 +3,7 @@
 namespace Repay\Fee\DTO;
 
 use Carbon\Carbon;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Enums\FeeType;
 
 class CreateFee
@@ -11,7 +12,7 @@ class CreateFee
         public string $itemType,
         public FeeType $feeType,
         public float $value,
-        public string $calculationType = 'percentage',
+        public CalculationType $calculationType,
         public bool $isActive = true,
         public ?Carbon $effectiveFrom = null,
         public ?string $reason = null
@@ -25,7 +26,7 @@ class CreateFee
             itemType: $data['item_type'],
             feeType: FeeType::from($data['fee_type']),
             value: (float) $data['value'],
-            calculationType: $data['calculation_type'] ?? 'percentage',
+            calculationType: $data['calculation_type'] ?? CalculationType::PERCENTAGE,
             isActive: $data['is_active'] ?? true,
             effectiveFrom: isset($data['effective_from'])
                 ? Carbon::parse($data['effective_from'])
@@ -53,8 +54,8 @@ class CreateFee
 
     protected function validate(): void
     {
-        if (! in_array($this->calculationType, ['percentage', 'fixed'])) {
-            throw new \InvalidArgumentException("Calculation type must be 'percentage' or 'fixed'");
+        if (! in_array($this->calculationType, [CalculationType::PERCENTAGE, CalculationType::FLAT])) {
+            throw new \InvalidArgumentException("Calculation type must be CalculationType::PERCENTAGE or CalculationType::FLAT");
         }
 
         if ($this->value < 0) {

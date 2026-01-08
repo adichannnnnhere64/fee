@@ -6,6 +6,7 @@ namespace Repay\Fee\Tests\Unit\Services;
 
 use Mockery;
 use Repay\Fee\Contracts\FeeContextInterface;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Facades\Fee;
 use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeTransaction;
@@ -126,7 +127,7 @@ test('fee context interface works with order model', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -183,7 +184,7 @@ test('fee context interface works with invoice model for service items', functio
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -194,7 +195,7 @@ test('fee context interface works with invoice model for service items', functio
         'item_type' => 'service',
         'fee_type' => 'convenience',
         'value' => 50.0,
-        'calculation_type' => 'fixed',
+        'calculation_type' => CalculationType::FLAT,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -257,7 +258,7 @@ test('fee context interface handles global fees when no fee entity', function ()
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 5.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -307,7 +308,7 @@ test('fee context interface with multiple item types in same context', function 
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 20.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -324,7 +325,7 @@ test('fee context interface with multiple item types in same context', function 
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -362,7 +363,7 @@ test('fee context interface metadata is properly recorded', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 12.5,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -481,7 +482,7 @@ test('fee facade provides context-aware methods', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);

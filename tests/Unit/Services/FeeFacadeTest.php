@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Facade;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Facades\Fee;
 use Repay\Fee\Models\FeeRule;
 
@@ -20,7 +21,7 @@ test('facade proxies to service correctly', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -40,7 +41,7 @@ test('facade calculateFor works correctly', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -79,7 +80,7 @@ test('facade setFeeForEntity works correctly', function (): void {
         'is_active' => true,
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
     ];
 
     $fee = Fee::setFeeForEntity($data, $this->user);
@@ -101,7 +102,7 @@ test('facade createGlobalFee works correctly', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 20.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
     ];
 
     $fee = Fee::createGlobalFee($data);
@@ -121,7 +122,7 @@ test('facade getAllActiveFeesFor works correctly', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -132,7 +133,7 @@ test('facade getAllActiveFeesFor works correctly', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -155,7 +156,7 @@ test('facade getGlobalFees works correctly', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -184,7 +185,7 @@ test('facade handles different entity types', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
     ], $this->user);
 
     // Test with Merchant entity
@@ -192,7 +193,7 @@ test('facade handles different entity types', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
     ], $this->merchant);
 
     $userFee = Fee::getActiveFeeFor($this->user, 'product');

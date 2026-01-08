@@ -1,5 +1,6 @@
 <?php
 
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Facades\Fee;
 
 test('complete workflow: create fee, update, log history, check upcoming', function (): void {
@@ -10,7 +11,7 @@ test('complete workflow: create fee, update, log history, check upcoming', funct
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ], $user);
 
@@ -40,7 +41,7 @@ test('global and entity fees work independently', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 5.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ]);
 
@@ -49,7 +50,7 @@ test('global and entity fees work independently', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ], $user1);
 

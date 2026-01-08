@@ -3,6 +3,7 @@
 namespace Repay\Fee\Tests\Feature;
 
 use Carbon\Carbon;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Facades\Fee;
 use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeTransaction;
@@ -142,7 +143,7 @@ function createTransaction(
         'item_type' => $feeType === 'markup' ? 'product' : 'service',
         'fee_type' => $feeType,
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);

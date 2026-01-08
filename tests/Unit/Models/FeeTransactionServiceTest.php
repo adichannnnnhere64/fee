@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Enums\FeeTransactionStatus;
 use Repay\Fee\Enums\FeeType;
 use Repay\Fee\Models\FeeRule;
@@ -27,7 +28,7 @@ test('recordFee creates fee transaction with all required data', function (): vo
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -73,7 +74,7 @@ test('recordFee creates fee transaction with all required data', function (): vo
 
     // System-added metadata
     expect($metadata['rate_used'])->toBe('10.0000');
-    expect($metadata['calculation_type'])->toBe('percentage');
+    expect($metadata['calculation_type'])->toBe(CalculationType::PERCENTAGE->label());
     expect($metadata['is_global'])->toBe(false);
 
     // Fee rule snapshot
@@ -82,7 +83,7 @@ test('recordFee creates fee transaction with all required data', function (): vo
 
     expect($snapshot['id'])->toBe($feeRule->id);
     expect($snapshot['value'])->toBe('10.0000');
-    expect($snapshot['calculation_type'])->toBe('percentage');
+    expect($snapshot['calculation_type'])->toBe(CalculationType::PERCENTAGE->value);
     expect($snapshot['item_type'])->toBe('product');
     expect($snapshot['fee_type'])->toBe('markup');
     expect($snapshot['is_active'])->toBe(true);
@@ -98,7 +99,7 @@ test('recordFee generates transaction ID if not provided', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -123,7 +124,7 @@ test('recordFee works with different fee types', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -134,7 +135,7 @@ test('recordFee works with different fee types', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -145,7 +146,7 @@ test('recordFee works with different fee types', function (): void {
         'item_type' => 'service',
         'fee_type' => 'convenience',
         'value' => 5.0,
-        'calculation_type' => 'fixed',
+        'calculation_type' => CalculationType::FLAT,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -189,7 +190,7 @@ test('reverseFee updates transaction status and adds reversal metadata', functio
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -229,7 +230,7 @@ test('reverseFee preserves original metadata while adding reversal data', functi
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -271,7 +272,7 @@ test('getFeesForBearer returns paginated results', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -324,7 +325,7 @@ test('getFeesForBearer applies status filter correctly', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -383,7 +384,7 @@ test('getFeesForBearer applies date range filter correctly', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -451,7 +452,7 @@ test('getFeesForBearer applies fee type filter correctly', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -462,7 +463,7 @@ test('getFeesForBearer applies fee type filter correctly', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -507,7 +508,7 @@ test('getFeesForBearer respects per_page parameter', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -546,7 +547,7 @@ test('getTotalFeesForBearer calculates correct totals', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -620,7 +621,7 @@ test('getTotalFeesForBearer applies date range filter', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -694,7 +695,7 @@ test('getTotalFeesForBearer applies fee type filter', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -705,7 +706,7 @@ test('getTotalFeesForBearer applies fee type filter', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -791,7 +792,7 @@ test('transaction ID generation follows correct format', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -833,7 +834,7 @@ test('recordFee includes fee rule snapshot when fee rule exists', function (): v
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 12.5,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
         'effective_from' => now()->subDay(),
@@ -854,7 +855,7 @@ test('recordFee includes fee rule snapshot when fee rule exists', function (): v
     expect($snapshot)
         ->id->toBe($feeRule->id)
         ->value->toBe('12.5000')
-        ->calculation_type->toBe('percentage')
+        ->calculation_type->toBe(CalculationType::PERCENTAGE->value)
         ->item_type->toBe('product')
         ->fee_type->toBe('markup')
         ->is_active->toBe(true)

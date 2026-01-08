@@ -72,7 +72,7 @@ class FeeTransactionService
             'reference_number' => $referenceNumber,
             'metadata' => array_merge($metadata, [
                 'fee_rule_snapshot' => $feeRule->toArray(),
-                'calculation_type' => $feeRule->calculation_type,
+                'calculation_type' => $feeRule->calculation_type->label(),
                 'rate_used' => $feeRule->value,
                 'is_global' => $feeRule->is_global,
             ]),

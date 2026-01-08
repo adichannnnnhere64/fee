@@ -5,6 +5,7 @@ namespace Repay\Fee\Tests\Unit\Services;
 use Carbon\Carbon;
 use Repay\Fee\DTO\AnalyticsFilter;
 use Repay\Fee\DTO\MonthlyAnalyticsFilter;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Models\FeeTransaction;
 use Repay\Fee\Services\AnalyticsService;
@@ -142,7 +143,7 @@ test('get comparative analysis shows percentage changes', function (): void {
     $result = $this->service->getComparativeAnalysis($filter1, $filter2);
 
     expect($result['comparison']['markup']['change']['amount'])->toBe(50.00); // 150 - 100
-    expect($result['comparison']['markup']['change']['percentage'])->toBe(50.00); // 50% increase
+    expect($result['comparison']['markup']['change'][CalculationType::PERCENTAGE->label()])->toBe(50.00); // 50% increase
     expect($result['comparison']['markup']['change']['direction'])->toBe('increase');
 
     expect($result['comparison']['commission']['change']['amount'])->toBe(-25.00); // 25 - 50
@@ -175,7 +176,7 @@ test('filters by item type work correctly', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -186,7 +187,7 @@ test('filters by item type work correctly', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);

@@ -1,5 +1,6 @@
 <?php
 
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Facades\Fee;
 use Repay\Fee\Models\FeeHistory;
 use Repay\Fee\Models\FeeRule;
@@ -16,7 +17,7 @@ test('merchants inherit global fees but can override with specific fees', functi
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'effective_from' => now(),
     ]);
@@ -37,7 +38,7 @@ test('merchants inherit global fees but can override with specific fees', functi
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ], $merchants[3]);
 
@@ -62,7 +63,7 @@ test('merchants inherit global fees but can override with specific fees', functi
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 12.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'effective_from' => now()->addDays(7), // Future date
     ]);
@@ -136,7 +137,7 @@ test('service fee inheritance works similarly', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0, // 5%
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ]);
 
@@ -147,7 +148,7 @@ test('service fee inheritance works similarly', function (): void {
         'item_type' => 'service',
         'fee_type' => 'convenience',
         'value' => 3.0, // $3 fixed
-        'calculation_type' => 'fixed',
+        'calculation_type' => CalculationType::FLAT,
         'is_active' => false,
     ]);
     /* dd($globalCommission); */
@@ -164,7 +165,7 @@ test('service fee inheritance works similarly', function (): void {
         'item_type' => 'service',
         'fee_type' => 'convenience',
         'value' => 5.0, // $5 fixed
-        'calculation_type' => 'fixed',
+        'calculation_type' => CalculationType::FLAT,
         'is_active' => true,
     ], $merchant2);
 
@@ -181,7 +182,7 @@ test('service fee inheritance works similarly', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 7.0, // 7%
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ], $merchant2);
 
@@ -239,7 +240,7 @@ test('multiple fee updates with effective dates', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'effective_from' => $now,
     ]);
@@ -253,7 +254,7 @@ test('multiple fee updates with effective dates', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 12.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'effective_from' => $now->copy()->addDays(5),
     ]);
@@ -268,7 +269,7 @@ test('multiple fee updates with effective dates', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'effective_from' => $now->copy()->addDays(10),
     ], $merchant);
@@ -283,7 +284,7 @@ test('multiple fee updates with effective dates', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 18.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'effective_from' => $now->copy()->addDays(15),
     ], $merchant);
@@ -337,7 +338,7 @@ test('fee inheritance with mixed item types', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ]);
 
@@ -345,7 +346,7 @@ test('fee inheritance with mixed item types', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 5.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ]);
 
@@ -361,7 +362,7 @@ test('fee inheritance with mixed item types', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ], $merchant);
 

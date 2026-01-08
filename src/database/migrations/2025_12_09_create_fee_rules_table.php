@@ -14,7 +14,7 @@ return new class extends Migration
             $table->enum('item_type', ['product', 'service']);
             $table->enum('fee_type', ['markup', 'commission', 'convenience']);
             $table->decimal('value', 10, 4);
-            $table->enum('calculation_type', ['percentage', 'fixed'])->default('percentage');
+            $table->integer('calculation_type')->default(1);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_global')->default(false);
             $table->timestamp('effective_from')->nullable();

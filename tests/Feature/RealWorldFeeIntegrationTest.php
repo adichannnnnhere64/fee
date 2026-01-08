@@ -5,6 +5,7 @@ namespace Repay\Fee\Tests\Feature;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Repay\Fee\Contracts\FeeableInterface;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Enums\FeeType;
 use Repay\Fee\Facades\Fee;
 use Repay\Fee\Models\FeeRule;
@@ -276,7 +277,7 @@ test('complete real-world e-commerce scenario', function () {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 5.0, // 5% markup
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'effective_from' => now()->addDays(1),
     ], $merchant);
@@ -286,7 +287,7 @@ test('complete real-world e-commerce scenario', function () {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 3.0, // 3% global markup
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'effective_from' => now()->addDays(2),
     ]);
@@ -355,7 +356,7 @@ test('complete real-world e-commerce scenario', function () {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 7.5, // Increased to 7.5%
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ], $merchant);
 
@@ -405,7 +406,7 @@ test('complete real-world service booking scenario', function () {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 10.0, // 10% commission to platform
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ], $provider);
 
@@ -414,7 +415,7 @@ test('complete real-world service booking scenario', function () {
         'item_type' => 'service',
         'fee_type' => 'convenience',
         'value' => 25.0, // $25 fixed convenience fee
-        'calculation_type' => 'fixed',
+        'calculation_type' => CalculationType::FLAT,
         'is_active' => true,
     ]);
 
@@ -497,7 +498,7 @@ test('mixed scenario with multiple merchants and fee types', function () {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ], $merchant1);
 
@@ -506,7 +507,7 @@ test('mixed scenario with multiple merchants and fee types', function () {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 8.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
     ], $merchant2);
 

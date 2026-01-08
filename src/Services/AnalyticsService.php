@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Repay\Fee\Contracts\AnalyticsInterface;
 use Repay\Fee\DTO\AnalyticsFilter;
 use Repay\Fee\DTO\MonthlyAnalyticsFilter;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Enums\FeeType;
 use Repay\Fee\Models\FeeTransaction;
 
@@ -401,7 +402,7 @@ class AnalyticsService implements AnalyticsInterface
                 'period_2' => $period2,
                 'change' => [
                     'amount' => $changeAmount,
-                    'percentage' => round($changePercentage, 2),
+                    CalculationType::PERCENTAGE->label() => round($changePercentage, 2),
                     'direction' => $changeAmount >= 0 ? 'increase' : 'decrease',
                 ],
             ];

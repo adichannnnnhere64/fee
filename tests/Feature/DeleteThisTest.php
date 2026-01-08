@@ -1,6 +1,7 @@
 <?php
 
 use Repay\Fee\DTO\CreateFee;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Enums\FeeType;
 use Repay\Fee\Facades\Fee;
 
@@ -12,7 +13,7 @@ test('play ground', function () {
         itemType: 'product',
         feeType: FeeType::MARKUP,
         value: 5000,
-        calculationType: 'percentage',
+        calculationType: CalculationType::PERCENTAGE,
         effectiveFrom: now()->subDays(5),
         reason: 'nochoice'
     ));
@@ -21,7 +22,7 @@ test('play ground', function () {
         itemType: 'service',
         feeType: FeeType::COMMISSION,
         value: 20,
-        calculationType: 'percentage',
+        calculationType: CalculationType::PERCENTAGE,
         effectiveFrom: now()->subDays(5),
         reason: 'nochoice'
     ), $merchant);
@@ -30,7 +31,7 @@ test('play ground', function () {
         itemType: 'product',
         feeType: FeeType::MARKUP,
         value: 69,
-        calculationType: 'percentage',
+        calculationType: CalculationType::PERCENTAGE,
         effectiveFrom: now()->subDays(3),
         reason: 'nochoice'
     ));
@@ -40,7 +41,7 @@ test('play ground', function () {
         itemType: 'product',
         feeType: FeeType::MARKUP,
         value: 600,
-        calculationType: 'percentage',
+        calculationType: CalculationType::PERCENTAGE,
         effectiveFrom: now()->subDays(4),
         reason: 'nochoice'
     ), $merchant);
@@ -50,7 +51,7 @@ test('play ground', function () {
         itemType: 'product',
         feeType: FeeType::MARKUP,
         value: 9999,
-        calculationType: 'percentage',
+        calculationType: CalculationType::PERCENTAGE,
         effectiveFrom: now()->subDays(2),
         reason: 'nochoice'
     ));

@@ -16,7 +16,7 @@ class FeeRuleFactory extends Factory
             'entity_type' => null,
             'fee_type' => 'markup',
             'item_type' => 'product',
-            'calculation_type' => 'percentage',
+            'calculation_type' => CalculationType::PERCENTAGE,
             'value' => $this->faker->randomFloat(2, 1, 30),
             'min_amount' => null,
             'max_amount' => null,
@@ -65,7 +65,7 @@ class FeeRuleFactory extends Factory
     public function percentage(?float $value = null): self
     {
         return $this->state([
-            'calculation_type' => 'percentage',
+            'calculation_type' => CalculationType::PERCENTAGE,
 
             'value' => $value ?? $this->faker->randomFloat(2, 1, 30),
         ]);
@@ -74,7 +74,7 @@ class FeeRuleFactory extends Factory
     public function fixed(?float $value = null): self
     {
         return $this->state([
-            'calculation_type' => 'fixed',
+            'calculation_type' => CalculationType::FLAT,
             'value' => $value ?? $this->faker->randomFloat(2, 1, 10),
         ]);
     }

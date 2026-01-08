@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Cache;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Services\FeeService;
 
@@ -21,7 +22,7 @@ test('getActiveFeeFor returns entity-specific fee when exists', function (): voi
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -43,7 +44,7 @@ test('getActiveFeeFor returns global fee when no entity-specific fee', function 
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -70,7 +71,7 @@ test('getActiveFeeFor only returns active fees', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => false,
         'is_global' => false,
     ]);
@@ -88,7 +89,7 @@ test('getActiveFeeFor respects effective dates', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
         'effective_from' => now()->addDays(1),
@@ -107,7 +108,7 @@ test('setFeeForEntity creates new fee and deactivates old ones', function (): vo
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -117,7 +118,7 @@ test('setFeeForEntity creates new fee and deactivates old ones', function (): vo
         'fee_type' => 'markup',
         'is_active' => true,
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
     ];
 
     $newFee = $this->service->setFeeForEntity($data, $this->user);
@@ -141,7 +142,7 @@ test('createGlobalFee creates fee with global flag', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 20.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
     ];
 
     $fee = $this->service->createGlobalFee($data);
@@ -163,7 +164,7 @@ test('calculateFor returns correct calculation for percentage fee', function ():
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0, // 10%
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -186,7 +187,7 @@ test('calculateFor returns correct calculation for fixed fee', function (): void
         'item_type' => 'service',
         'fee_type' => 'convenience',
         'value' => 5.0, // $5 fixed
-        'calculation_type' => 'fixed',
+        'calculation_type' => CalculationType::FLAT,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -196,7 +197,7 @@ test('calculateFor returns correct calculation for fixed fee', function (): void
     expect($result)
         ->fee_amount->toBe(5.00)
         ->total->toBe(105.00)
-        ->fee_rule->calculation_type->toBe('fixed');
+        ->fee_rule->calculation_type->toBe(CalculationType::FLAT);
 });
 
 test('calculateFor returns no fee when none exists', function (): void {
@@ -216,7 +217,7 @@ test('getAllActiveFeesFor returns all item types', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -227,7 +228,7 @@ test('getAllActiveFeesFor returns all item types', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -251,7 +252,7 @@ test('getGlobalFees returns only global active fees', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -263,7 +264,7 @@ test('getGlobalFees returns only global active fees', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -275,7 +276,7 @@ test('getGlobalFees returns only global active fees', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 5.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => false,
         'is_global' => true,
     ]);
@@ -298,7 +299,7 @@ test('clearCacheForEntity removes cached fees', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -325,7 +326,7 @@ test('validation prevents invalid fee types', function (): void {
             'item_type' => 'product',
             'fee_type' => 'commission', // Invalid! Product can only have markup
             'value' => 10.0,
-            'calculation_type' => 'percentage',
+            'calculation_type' => CalculationType::PERCENTAGE,
             'is_active' => true,
             'is_global' => false,
         ]);
@@ -340,7 +341,7 @@ test('validation prevents invalid item types', function (): void {
             'item_type' => 'invalid', // Invalid item type
             'fee_type' => 'markup',
             'value' => 10.0,
-            'calculation_type' => 'percentage',
+            'calculation_type' => CalculationType::PERCENTAGE,
             'is_active' => true,
             'is_global' => false,
         ]);
@@ -354,7 +355,7 @@ test('isCurrentlyActive returns correct status', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
         'effective_from' => now()->subDay(),
@@ -371,7 +372,7 @@ test('isCurrentlyActive returns false for future effective date', function (): v
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
         'effective_from' => now()->addDay(),
@@ -391,7 +392,7 @@ test('multiple entities can have separate fees', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -403,7 +404,7 @@ test('multiple entities can have separate fees', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 20.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);

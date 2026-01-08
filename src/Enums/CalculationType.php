@@ -2,7 +2,7 @@
 
 namespace Repay\Fee\Enums;
 
-enum CalculationType: string
+enum CalculationType: int
 {
     case FLAT = 0;
     case PERCENTAGE = 1;

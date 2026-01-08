@@ -30,7 +30,8 @@ class FeeRule extends Model
         'value' => 'decimal:4',
         'is_active' => 'boolean',
         'is_global' => 'boolean',
-        'effective_from' => 'datetime',
+		'effective_from' => 'datetime',
+	'calculation_type' => CalculationType::class
     ];
 
     protected static function booted()
@@ -138,7 +139,7 @@ class FeeRule extends Model
 
     public function calculate(float $amount): float
     {
-        if ($this->calculation_type === 'percentage') {
+        if ($this->calculation_type === CalculationType::PERCENTAGE) {
             return $amount * ($this->value / 100);
         }
 

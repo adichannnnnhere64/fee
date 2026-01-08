@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Cache;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Models\FeeHistory;
 use Repay\Fee\Models\FeeRule;
 use Repay\Fee\Services\FeeHistoryService;
@@ -23,7 +24,7 @@ test('getForEntity returns paginated history for entity', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -58,7 +59,7 @@ test('getForEntity respects per_page filter', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -89,7 +90,7 @@ test('getForEntity filters by item_type', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -100,7 +101,7 @@ test('getForEntity filters by item_type', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 5.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -147,7 +148,7 @@ test('getForEntity filters by fee_type', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -158,7 +159,7 @@ test('getForEntity filters by fee_type', function (): void {
         'item_type' => 'service',
         'fee_type' => 'convenience',
         'value' => 5.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -197,7 +198,7 @@ test('getForEntity filters by date range', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -265,7 +266,7 @@ test('getGlobal returns paginated global history', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -290,7 +291,7 @@ test('getGlobal returns paginated global history', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 15.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -319,7 +320,7 @@ test('getGlobal respects filters', function (): void {
         'item_type' => 'service',
         'fee_type' => 'commission',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -353,7 +354,7 @@ test('logChange creates history entry', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -383,7 +384,7 @@ test('logChange with empty oldData creates "created" action', function (): void 
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -407,7 +408,7 @@ test('caching works for getForEntity', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);
@@ -461,7 +462,7 @@ test('caching works for getGlobal', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
     ]);
@@ -512,7 +513,7 @@ test('caching works for getGlobal', function (): void {
 /*         'item_type' => 'product', */
 /*         'fee_type' => 'markup', */
 /*         'value' => 10.0, */
-/*         'calculation_type' => 'percentage', */
+/*         'calculation_type' => CalculationType::PERCENTAGE, */
 /*         'is_active' => true, */
 /*         'is_global' => false, */
 /*     ]); */
@@ -579,7 +580,7 @@ test('history includes feeRule relationship when requested', function (): void {
         'item_type' => 'product',
         'fee_type' => 'markup',
         'value' => 10.0,
-        'calculation_type' => 'percentage',
+        'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => false,
     ]);

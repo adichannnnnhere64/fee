@@ -81,7 +81,7 @@ class TestCase extends Orchestra
             'item_type' => 'product',
             'fee_type' => 'markup',
             'value' => 10.0,
-            'calculation_type' => 'percentage',
+            'calculation_type' => CalculationType::PERCENTAGE,
             'is_active' => true,
             'is_global' => false,
             'effective_from' => now(),
