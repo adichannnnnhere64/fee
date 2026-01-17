@@ -573,7 +573,7 @@ test('getLatestUpcomingFees orders by effective_from ASC then created_at DESC', 
         'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
-        'effective_from' => '2024-01-10 00:00:00', // 9 days in future
+        'effective_from' => now()->addDays(2), // 9 days in future
         'created_at' => '2023-12-31 00:00:00', // Older
     ]);
 
@@ -587,7 +587,7 @@ test('getLatestUpcomingFees orders by effective_from ASC then created_at DESC', 
         'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
-        'effective_from' => '2024-01-10 00:00:00', // Same effective date
+        'effective_from' =>  now()->addDays(2), // Same effective date
         'created_at' => '2024-01-01 00:00:00', // Newer (same as frozen time)
     ]);
 
@@ -601,7 +601,7 @@ test('getLatestUpcomingFees orders by effective_from ASC then created_at DESC', 
         'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
-        'effective_from' => '2024-01-15 00:00:00', // Later
+        'effective_from' => now()->addDays(5), // Later
         'created_at' => '2024-01-02 00:00:00', // Newest
     ]);
 
