@@ -63,9 +63,19 @@ FeeRule::create([
     'fee_template_id' => null,  // Not tied to a template
     'item_type' => 'product',
 
-    'fee_type' => 'markup',
+    'fee_type' => FeeType::MARKUP,
 
     'value' => 10.00,
 ]);
 
 ``php
+
+
+```
+
+item_type = 'product', 'service'
+
+fee_type = 'commission', 'markup' , 'convenience'
+ 
+
+```

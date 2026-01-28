@@ -560,10 +560,14 @@ test('entity-specific convenience returned when no entity commission', function 
         ->service->fee_type->toBe('convenience');
 });
 
-test('getLatestUpcomingFees orders by effective_from ASC then created_at DESC', function (): void {
-    // Freeze time
+use Illuminate\Support\Carbon;
 
-    // Create fee1 with older created_at - effective date IN THE FUTURE
+test('getLatestUpcomingFees orders by effective_from ASC then created_at DESC', function (): void {
+    // Freeze time at "today"
+    $now = Carbon::parse('2024-01-01 00:00:00'); // pick a base reference date
+    Carbon::setTestNow($now);
+
+    // Create fee1 with older created_at - effective date in the future
     $fee1 = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -573,11 +577,11 @@ test('getLatestUpcomingFees orders by effective_from ASC then created_at DESC', 
         'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
-        'effective_from' => now()->addDays(2), // 9 days in future
-        'created_at' => '2023-12-31 00:00:00', // Older
+        'effective_from' => $now->copy()->addDays(9), // 9 days in future
+        'created_at' => $now->copy()->subDays(1), // older
     ]);
 
-    // Create fee2 with newer created_at (same effective_from) - IN THE FUTURE
+    // Create fee2 with newer created_at (same effective_from) - also future
     $fee2 = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -587,11 +591,11 @@ test('getLatestUpcomingFees orders by effective_from ASC then created_at DESC', 
         'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
-        'effective_from' =>  now()->addDays(2), // Same effective date
-        'created_at' => '2024-01-01 00:00:00', // Newer (same as frozen time)
+        'effective_from' => $now->copy()->addDays(9), // same effective date
+        'created_at' => $now->copy(), // newer
     ]);
 
-    // Create fee3 with later effective date - IN THE FUTURE
+    // Create fee3 with later effective date - future
     $fee3 = FeeRule::create([
         'entity_type' => null,
         'entity_id' => null,
@@ -601,8 +605,8 @@ test('getLatestUpcomingFees orders by effective_from ASC then created_at DESC', 
         'calculation_type' => CalculationType::PERCENTAGE,
         'is_active' => true,
         'is_global' => true,
-        'effective_from' => now()->addDays(5), // Later
-        'created_at' => '2024-01-02 00:00:00', // Newest
+        'effective_from' => $now->copy()->addDays(14), // later
+        'created_at' => $now->copy()->addDay(), // newest
     ]);
 
     $result = $this->service->getLatestUpcomingFees();
@@ -614,11 +618,14 @@ test('getLatestUpcomingFees orders by effective_from ASC then created_at DESC', 
         dump('Fee1 effective_from:', $fee1->effective_from);
         dump('Fee2 effective_from:', $fee2->effective_from);
         dump('Fee3 effective_from:', $fee3->effective_from);
-        dump('Is fee1 upcoming?', $fee1->effective_from > now());
     }
 
     // Should return fee2 (same effective date as fee1 but newer created)
     expect($result['product'])->not()->toBeNull();
     expect($result['product']->id)->toBe($fee2->id)
         ->and($result['product']->value)->toBe('15.0000');
+
+    // Clear frozen time after test
+    Carbon::setTestNow();
 });
+

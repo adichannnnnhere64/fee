@@ -9,7 +9,7 @@ class FeeServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            __DIR__.'/config/config.php' => config_path('fee.php'),
+            __DIR__.'/../config/config.php' => config_path('fee.php'),
         ], 'fee-config');
 
         $this->publishes([
