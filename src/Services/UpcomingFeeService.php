@@ -46,12 +46,11 @@ class UpcomingFeeService implements UpcomingFeeInterface
 
     protected function getLatestUpcomingProductFee($entity = null): ?FeeRule
     {
-        $query = FeeRule::query()
+        $query = FeeRule::query()->with(['fee_history'])
             ->upcoming()
             ->forItemType('product')
             ->forFeeType('markup')
-            ->orderBy('effective_from', 'asc')
-            ->orderBy('created_at', 'desc');
+            ->orderBy('id', 'desc');
 
         if ($entity) {
             // Try entity-specific first
@@ -72,11 +71,12 @@ class UpcomingFeeService implements UpcomingFeeInterface
 
     protected function getLatestUpcomingServiceFee($entity = null): ?FeeRule
     {
-        $query = FeeRule::query()
+        $query = FeeRule::query()->with(['fee_history'])
             ->upcoming()
+
             ->forItemType('service')
-            ->orderBy('effective_from', 'asc')
-            ->orderBy('created_at', 'desc');
+            /* ->orderBy('effective_from', 'asc') */
+            ->orderByDesc('id');
 
         if ($entity) {
             // Try entity-specific first (commission, then convenience)
@@ -113,20 +113,10 @@ class UpcomingFeeService implements UpcomingFeeInterface
 
     protected function getLatestGlobalServiceFee($baseQuery): ?FeeRule
     {
-        $globalQuery = $baseQuery->clone()->global();
-
-        // Try commission first
-        $commissionFee = $globalQuery->clone()
-            ->forFeeType('commission')
-            ->first();
-
-        if ($commissionFee) {
-            return $commissionFee;
-        }
-
-        // Try convenience if no commission
-        return $globalQuery->clone()
-            ->forFeeType('convenience')
+        return $baseQuery->clone()
+            ->global()
+            ->whereIn('fee_type', ['commission', 'convenience'])
+            ->orderByDesc('id') // or orderByDesc('created_at')
             ->first();
     }
 

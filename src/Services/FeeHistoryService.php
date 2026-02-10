@@ -44,6 +44,19 @@ class FeeHistoryService implements FeeHistoryInterface
         });
     }
 
+    public function getQueryGlobal(array $filters = []): Builder
+    {
+        /* $cacheKey = $this->getGlobalHistoryCacheKey($filters); */
+
+        /* if (! config('fee.cache.enabled', true)) { */
+        return $this->queryGlobalHistory($filters);
+        /* } */
+
+        /* return Cache::remember($cacheKey, config('fee.cache.ttl'), function () use ($filters) { */
+        /*     return $this->queryGlobalHistory($filters); */
+        /* }); */
+    }
+
     public function logChange(FeeRule $feeRule, array $oldData, string $reason): void
     {
         FeeHistory::create([

@@ -863,3 +863,329 @@ test('recordFee includes fee rule snapshot when fee rule exists', function (): v
         ->entity_type->toBe(get_class($this->merchant))
         ->entity_id->toBe($this->merchant->id);
 });
+
+test('getAllFeeTransactions returns paginated results with filters', function (): void {
+    $feeRule = FeeRule::create([
+        'entity_type' => null,
+        'entity_id' => null,
+        'item_type' => 'product',
+        'fee_type' => 'markup',
+        'value' => 10.0,
+        'calculation_type' => CalculationType::PERCENTAGE,
+        'is_active' => true,
+        'is_global' => true,
+    ]);
+
+    // Create transactions for different entities
+    for ($i = 1; $i <= 20; $i++) {
+        $bearer = $i <= 10 ? $this->user : $this->merchant;
+        $this->service->recordFee(
+            feeRule: $feeRule,
+            feeBearer: $bearer,
+            feeable: $this->order,
+            transactionAmount: $i * 100,
+            feeAmount: $i * 10,
+            transactionId: "TXN-$i",
+        );
+    }
+
+    // Get all transactions
+    $allTransactions = $this->service->getAllFeeTransactions();
+    expect($allTransactions)
+        ->toBeInstanceOf(LengthAwarePaginator::class)
+        ->total()->toBe(20);
+
+    // Get with status filter
+    $appliedTransactions = $this->service->getAllFeeTransactions(['status' => 'applied']);
+    expect($appliedTransactions->total())->toBe(20);
+
+    // Get with per_page filter
+    $paginated = $this->service->getAllFeeTransactions(['per_page' => 5]);
+    expect($paginated->perPage())->toBe(5)
+        ->and($paginated->count())->toBe(5);
+});
+
+test('getFeeTransactionStats returns correct statistics', function (): void {
+    $feeRule = FeeRule::create([
+        'entity_type' => null,
+        'entity_id' => null,
+        'item_type' => 'product',
+        'fee_type' => 'markup',
+        'value' => 10.0,
+        'calculation_type' => CalculationType::PERCENTAGE,
+        'is_active' => true,
+        'is_global' => true,
+    ]);
+
+    // Create transactions
+    for ($i = 1; $i <= 5; $i++) {
+        $this->service->recordFee(
+            feeRule: $feeRule,
+            feeBearer: $this->user,
+            feeable: $this->order,
+            transactionAmount: $i * 100,
+            feeAmount: $i * 10,
+            transactionId: "TXN-$i",
+        );
+    }
+
+    $stats = $this->service->getFeeTransactionStats();
+
+    expect($stats)
+        ->total_transactions->toBe(5)
+        ->total_fee_amount->toBe(150.0)
+        ->total_transaction_amount->toBe(1500.0)
+        ->avg_fee_amount->toBe(30.0)
+        ->min_fee_amount->toBe(10.0)
+        ->max_fee_amount->toBe(50.0);
+});
+
+test('getFeeTransactionsByPeriod groups correctly', function (): void {
+    $feeRule = FeeRule::create([
+        'entity_type' => null,
+        'entity_id' => null,
+        'item_type' => 'product',
+        'fee_type' => 'markup',
+        'value' => 10.0,
+        'calculation_type' => CalculationType::PERCENTAGE,
+        'is_active' => true,
+        'is_global' => true,
+    ]);
+
+    // Create transactions on different dates
+    $this->travelTo('2024-01-15 10:00:00');
+    $this->service->recordFee(
+        feeRule: $feeRule,
+        feeBearer: $this->user,
+        feeable: $this->order,
+        transactionAmount: 100.00,
+        feeAmount: 10.00,
+        transactionId: 'TXN-JAN15',
+    );
+
+    $this->travelTo('2024-01-16 14:00:00');
+    $this->service->recordFee(
+        feeRule: $feeRule,
+        feeBearer: $this->user,
+        feeable: $this->order,
+        transactionAmount: 200.00,
+        feeAmount: 20.00,
+        transactionId: 'TXN-JAN16',
+    );
+
+    $this->travelTo('2024-02-01 10:00:00');
+    $this->service->recordFee(
+        feeRule: $feeRule,
+        feeBearer: $this->user,
+        feeable: $this->order,
+        transactionAmount: 300.00,
+        feeAmount: 30.00,
+        transactionId: 'TXN-FEB1',
+    );
+
+    $this->travelBack();
+
+    // Group by day
+    $daily = $this->service->getFeeTransactionsByPeriod('day');
+    expect($daily)->toHaveCount(3); // 3 different days
+
+    // Group by month
+    $monthly = $this->service->getFeeTransactionsByPeriod('month');
+    expect($monthly)->toHaveCount(2); // Jan and Feb
+
+    // Find January data
+    $janData = $monthly->firstWhere('period', '2024-01');
+    expect($janData['transaction_count'])->toBe(2)
+        ->and($janData['total_fee_amount'])->toBe(30.0);
+});
+
+test('getFeeTransactionsByFeeType groups by fee type', function (): void {
+    $markupFee = FeeRule::create([
+        'entity_type' => null,
+        'entity_id' => null,
+        'item_type' => 'product',
+        'fee_type' => 'markup',
+        'value' => 10.0,
+        'calculation_type' => CalculationType::PERCENTAGE,
+        'is_active' => true,
+        'is_global' => true,
+    ]);
+
+    $commissionFee = FeeRule::create([
+        'entity_type' => null,
+        'entity_id' => null,
+        'item_type' => 'service',
+        'fee_type' => 'commission',
+        'value' => 15.0,
+        'calculation_type' => CalculationType::PERCENTAGE,
+        'is_active' => true,
+        'is_global' => true,
+    ]);
+
+    // Create markup transactions
+    for ($i = 1; $i <= 3; $i++) {
+        $this->service->recordFee(
+            feeRule: $markupFee,
+            feeBearer: $this->user,
+            feeable: $this->order,
+            transactionAmount: $i * 100,
+            feeAmount: $i * 10,
+            transactionId: "TXN-MARKUP-$i",
+        );
+    }
+
+    // Create commission transactions
+    for ($i = 1; $i <= 2; $i++) {
+        $this->service->recordFee(
+            feeRule: $commissionFee,
+            feeBearer: $this->user,
+            feeable: $this->order,
+            transactionAmount: $i * 200,
+            feeAmount: $i * 30,
+            transactionId: "TXN-COMMISSION-$i",
+        );
+    }
+
+    $grouped = $this->service->getFeeTransactionsByFeeType();
+
+    expect($grouped)->toHaveCount(2);
+
+    $markupGroup = $grouped->firstWhere('fee_type', 'markup');
+    $commissionGroup = $grouped->firstWhere('fee_type', 'commission');
+
+    expect($markupGroup['transaction_count'])->toBe(3)
+        ->and($markupGroup['total_fee_amount'])->toBe(60.0)
+        ->and($commissionGroup['transaction_count'])->toBe(2)
+        ->and($commissionGroup['total_fee_amount'])->toBe(90.0);
+});
+
+
+test('searchFeeTransactions searches by transaction ID and reference number', function (): void {
+    $feeRule = FeeRule::create([
+        'entity_type' => null,
+        'entity_id' => null,
+        'item_type' => 'product',
+        'fee_type' => 'markup',
+        'value' => 10.0,
+        'calculation_type' => CalculationType::PERCENTAGE,
+        'is_active' => true,
+        'is_global' => true,
+    ]);
+
+    // Create transactions with different IDs
+    $this->service->recordFee(
+        feeRule: $feeRule,
+        feeBearer: $this->user,
+        feeable: $this->order,
+        transactionAmount: 100.00,
+        feeAmount: 10.00,
+        transactionId: 'ORDER-12345',
+        referenceNumber: 'INV-001',
+    );
+
+    $this->service->recordFee(
+        feeRule: $feeRule,
+        feeBearer: $this->user,
+        feeable: $this->order,
+        transactionAmount: 200.00,
+        feeAmount: 20.00,
+        transactionId: 'ORDER-67890',
+        referenceNumber: 'INV-002',
+    );
+
+    $this->service->recordFee(
+        feeRule: $feeRule,
+        feeBearer: $this->merchant,
+        feeable: $this->order,
+        transactionAmount: 300.00,
+        feeAmount: 30.00,
+        transactionId: 'PAYMENT-123',
+        referenceNumber: 'PAY-001',
+    );
+
+    // Search by transaction ID
+    $search1 = $this->service->searchFeeTransactions('ORDER');
+    expect($search1->total())->toBe(2);
+
+    // Search by specific transaction ID
+    $search2 = $this->service->searchFeeTransactions('ORDER-12345');
+    expect($search2->total())->toBe(1);
+    expect($search2->items()[0]->transaction_id)->toBe('ORDER-12345');
+
+    // Search by reference number
+    $search3 = $this->service->searchFeeTransactions('INV');
+    expect($search3->total())->toBe(2);
+
+    // Search with no results
+    $search4 = $this->service->searchFeeTransactions('NONEXISTENT');
+    expect($search4->total())->toBe(0);
+});
+
+
+// Update the applyTransactionFilters handles complex filter combinations test:
+
+test('applyTransactionFilters handles complex filter combinations', function (): void {
+    $markupFee = FeeRule::create([
+        'entity_type' => null,
+        'entity_id' => null,
+        'item_type' => 'product',
+        'fee_type' => 'markup',
+        'value' => 10.0,
+        'calculation_type' => CalculationType::PERCENTAGE,
+        'is_active' => true,
+        'is_global' => true,
+    ]);
+
+    $commissionFee = FeeRule::create([
+        'entity_type' => null,
+        'entity_id' => null,
+        'item_type' => 'service',
+        'fee_type' => 'commission',
+        'value' => 15.0,
+        'calculation_type' => CalculationType::PERCENTAGE,
+        'is_active' => true,
+        'is_global' => true,
+    ]);
+
+    // Create various transactions
+    $this->travelTo('2024-01-15 10:00:00');
+    $this->service->recordFee(
+        feeRule: $markupFee,
+        feeBearer: $this->user,
+        feeable: $this->order,
+        transactionAmount: 100.00,
+        feeAmount: 10.00,
+        transactionId: 'TXN1',
+    );
+
+    $this->travelTo('2024-01-16 10:00:00');
+    $this->service->recordFee(
+        feeRule: $commissionFee,
+        feeBearer: $this->merchant,
+        feeable: $this->order,
+        transactionAmount: 200.00,
+        feeAmount: 30.00,
+        transactionId: 'TXN2',
+    );
+
+    $this->travelTo('2024-02-01 10:00:00');
+    // Create a reversed transaction (should NOT appear in applied filter)
+    $transaction = $this->service->recordFee(
+        feeRule: $markupFee,
+        feeBearer: $this->user,
+        feeable: $this->order,
+        transactionAmount: 300.00,
+        feeAmount: 30.00,
+        transactionId: 'TXN3',
+    );
+    $this->service->reverseFee($transaction, 'Test reversal');
+
+    $this->travelBack();
+
+    // Multiple fee types filter (should get all 3 transactions)
+    $multipleFeeTypes = $this->service->getAllFeeTransactions([
+        'fee_type' => ['markup', 'commission'],
+    ]);
+
+    expect($multipleFeeTypes->total())->toBe(3);
+});

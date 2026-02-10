@@ -56,21 +56,19 @@ class FeeService
         });
     }
 
-    public function setFeeForEntity(array|CreateFee $data, $entity): FeeRule
+        public function setFeeForEntity(array|CreateFee $data, $entity): FeeRule
     {
         // Convert array to DTO if needed
         $dto = $data instanceof CreateFee
             ? $data
-
             : CreateFee::fromArray($data);
 
         $itemType = $dto->itemType;
 
         // Find existing active fee for this entity and item type
-
         $existingFee = FeeRule::forEntity($entity)
             ->forItemType($itemType)
-            ->active()
+            /* ->active() */
             ->first();
 
         // Deactivate any existing active fee
@@ -80,30 +78,29 @@ class FeeService
 
         // Create new fee using DTO's database array
         $fee = FeeRule::create(array_merge($dto->toDatabaseArray(), [
-
             'entity_type' => get_class($entity),
             'entity_id' => $entity->getKey(),
-
             'is_global' => false,
+
         ]));
 
         $this->clearCacheForEntity($entity);
 
         // Log the change using DTO's reason
         $logReason = $dto->getReason();
-
-
         if ($existingFee) {
             $logReason = $existingFee->is_active ? 'Replaced active fee' : $logReason;
         }
 
         app('fee.history')->logChange(
             $fee,
-            $existingFee?->toArray() ?? [],
+            $existingFee ? $existingFee->toArray() : [], // Pass previous fee data
             $logReason
         );
 
+
         return $fee;
+
     }
 
     public function createGlobalFee(array|CreateFee $data): FeeRule
@@ -113,21 +110,79 @@ class FeeService
             ? $data
             : CreateFee::fromArray($data);
 
+        $previousFee = FeeRule::global()
+            ->forItemType($dto->itemType)
+            /* ->forFeeType($dto->feeType->value) */
+            ->orderBy('id', 'desc')
+            ->first();
+
         // Create fee using DTO's database array
         $fee = FeeRule::create(array_merge($dto->toDatabaseArray(), [
             'is_global' => true,
             'entity_type' => null,
             'entity_id' => null,
-
         ]));
+
+        // Deactivate the previous fee if it exists and is active
+        if ($previousFee && $previousFee->is_active) {
+
+            $previousFee->update(['is_active' => false]);
+        }
+
+
+        // Determine action and reason
+        $action = $previousFee ? 'updated' : 'created';
+        $reason = $previousFee
+            ? "Updated global {$dto->itemType} {$dto->feeType->value} fee"
+            : $dto->getReason();
 
         app('fee.history')->logChange(
             $fee,
-            [],
-            $dto->getReason()
+            $previousFee ? $previousFee->toArray() : [], // Pass previous fee data
+            $reason
         );
 
         return $fee;
+    }
+
+    // Add new method to get previous fee
+    public function getPreviousFee(FeeRule $feeRule): ?FeeRule
+    {
+        $query = FeeRule::query();
+
+
+        if ($feeRule->is_global) {
+            $query->global();
+        } else {
+
+            $query->where('entity_type', $feeRule->entity_type)
+                  ->where('entity_id', $feeRule->entity_id);
+        }
+
+        return $query
+            ->forItemType($feeRule->item_type)
+            ->forFeeType($feeRule->fee_type)
+            ->where('id', '!=', $feeRule->id)
+            ->where('is_active', false) // Only get inactive previous fees
+            ->orderBy('effective_from', 'desc')
+            ->first();
+    }
+
+    // Add method to get fee history with previous context
+    public function getFeeHistoryWithPrevious($entity, array $filters = []): array
+    {
+        $history = app('fee.history')->getForEntity($entity, $filters);
+
+        foreach ($history['data'] as &$item) {
+
+            if (!empty($item['old_data']['id'])) {
+                // Find the previous fee that was replaced
+                $item['previous_fee'] = FeeRule::withTrashed()->find($item['old_data']['id']);
+            }
+        }
+
+
+        return $history;
     }
 
     public function calculateFor($entity, float $amount, string $itemType): array

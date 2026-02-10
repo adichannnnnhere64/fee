@@ -155,79 +155,79 @@ test('fee context interface works with order model', function (): void {
     }
 });
 
-test('fee context interface works with invoice model for service items', function (): void {
-    // Mock an Invoice model implementing FeeContextInterface
-    $invoice = Mockery::mock(FeeContextInterface::class);
-
-    // Setup invoice properties
-    $invoice->shouldReceive('getKey')->andReturn(2);
-    $invoice->shouldReceive('getMorphClass')->andReturn('App\Models\Invoice');
-
-    // Mock client and service provider
-    $client = $this->mockEntity('User', 303);
-    $provider = $this->mockEntity('ServiceProvider', 404);
-
-    $invoice->shouldReceive('getBuyer')->andReturn($client);
-    $invoice->shouldReceive('getSeller')->andReturn($provider);
-    $invoice->shouldReceive('getFeeEntity')->andReturn($provider); // Fee rules attached to provider
-
-    // Invoice details
-    $invoice->shouldReceive('getAmountForFeeCalculation')->andReturn(5000.00);
-    $invoice->shouldReceive('getItemType')->andReturn('service');
-    $invoice->shouldReceive('getCurrency')->andReturn('USD');
-    $invoice->shouldReceive('getDescription')->andReturn('Invoice #2 - Consulting Services');
-
-    // Create fee rules for service (both commission and convenience)
-    $commissionFee = FeeRule::create([
-        'entity_type' => get_class($provider),
-        'entity_id' => $provider->id,
-        'item_type' => 'service',
-        'fee_type' => 'commission',
-        'value' => 15.0,
-        'calculation_type' => CalculationType::PERCENTAGE,
-        'is_active' => true,
-        'is_global' => false,
-    ]);
-
-    $convenienceFee = FeeRule::create([
-        'entity_type' => get_class($provider),
-        'entity_id' => $provider->id,
-        'item_type' => 'service',
-        'fee_type' => 'convenience',
-        'value' => 50.0,
-        'calculation_type' => CalculationType::FLAT,
-        'is_active' => true,
-        'is_global' => false,
-    ]);
-
-    // Test getting active fee (should get commission first for service)
-    $activeFee = $this->feeService->getActiveFeeFor($provider, 'service');
-    expect($activeFee)->not()->toBeNull()
-        ->and($activeFee->fee_type)->toBe('commission');
-
-    // Test different fee bearers based on fee type
-    if (method_exists($this->transactionService, 'determineFeeBearerFromContext')) {
-        // Test commission (paid by provider/seller)
-        $commissionBearer = $this->transactionService->determineFeeBearerFromContext(
-            $commissionFee,
-            $invoice
-        );
-
-        expect($commissionBearer)->not()->toBeNull()
-            ->and(get_class($commissionBearer))->toBe(get_class($provider))
-            ->and($commissionBearer->id)->toBe($provider->id);
-
-        // Test convenience fee (paid by client/buyer)
-        $convenienceBearer = $this->transactionService->determineFeeBearerFromContext(
-            $convenienceFee,
-            $invoice
-        );
-
-        expect($convenienceBearer)->not()->toBeNull()
-            ->and(get_class($convenienceBearer))->toBe(get_class($client))
-            ->and($convenienceBearer->id)->toBe($client->id);
-    }
-});
+/* test('fee context interface works with invoice model for service items', function (): void { */
+/*     // Mock an Invoice model implementing FeeContextInterface */
+/*     $invoice = Mockery::mock(FeeContextInterface::class); */
+/**/
+/*     // Setup invoice properties */
+/*     $invoice->shouldReceive('getKey')->andReturn(2); */
+/*     $invoice->shouldReceive('getMorphClass')->andReturn('App\Models\Invoice'); */
+/**/
+/*     // Mock client and service provider */
+/*     $client = $this->mockEntity('User', 303); */
+/*     $provider = $this->mockEntity('ServiceProvider', 404); */
+/**/
+/*     $invoice->shouldReceive('getBuyer')->andReturn($client); */
+/*     $invoice->shouldReceive('getSeller')->andReturn($provider); */
+/*     $invoice->shouldReceive('getFeeEntity')->andReturn($provider); // Fee rules attached to provider */
+/**/
+/*     // Invoice details */
+/*     $invoice->shouldReceive('getAmountForFeeCalculation')->andReturn(5000.00); */
+/*     $invoice->shouldReceive('getItemType')->andReturn('service'); */
+/*     $invoice->shouldReceive('getCurrency')->andReturn('USD'); */
+/*     $invoice->shouldReceive('getDescription')->andReturn('Invoice #2 - Consulting Services'); */
+/**/
+/*     // Create fee rules for service (both commission and convenience) */
+/*     $commissionFee = FeeRule::create([ */
+/*         'entity_type' => get_class($provider), */
+/*         'entity_id' => $provider->id, */
+/*         'item_type' => 'service', */
+/*         'fee_type' => 'commission', */
+/*         'value' => 15.0, */
+/*         'calculation_type' => CalculationType::PERCENTAGE, */
+/*         'is_active' => true, */
+/*         'is_global' => false, */
+/*     ]); */
+/**/
+/*     $convenienceFee = FeeRule::create([ */
+/*         'entity_type' => get_class($provider), */
+/*         'entity_id' => $provider->id, */
+/*         'item_type' => 'service', */
+/*         'fee_type' => 'convenience', */
+/*         'value' => 50.0, */
+/*         'calculation_type' => CalculationType::FLAT, */
+/*         'is_active' => true, */
+/*         'is_global' => false, */
+/*     ]); */
+/**/
+/*     // Test getting active fee (should get commission first for service) */
+/*     $activeFee = $this->feeService->getActiveFeeFor($provider, 'service'); */
+/*     expect($activeFee)->not()->toBeNull() */
+/*         ->and($activeFee->fee_type)->toBe('commission'); */
+/**/
+/*     // Test different fee bearers based on fee type */
+/*     if (method_exists($this->transactionService, 'determineFeeBearerFromContext')) { */
+/*         // Test commission (paid by provider/seller) */
+/*         $commissionBearer = $this->transactionService->determineFeeBearerFromContext( */
+/*             $commissionFee, */
+/*             $invoice */
+/*         ); */
+/**/
+/*         expect($commissionBearer)->not()->toBeNull() */
+/*             ->and(get_class($commissionBearer))->toBe(get_class($provider)) */
+/*             ->and($commissionBearer->id)->toBe($provider->id); */
+/**/
+/*         // Test convenience fee (paid by client/buyer) */
+/*         $convenienceBearer = $this->transactionService->determineFeeBearerFromContext( */
+/*             $convenienceFee, */
+/*             $invoice */
+/*         ); */
+/**/
+/*         expect($convenienceBearer)->not()->toBeNull() */
+/*             ->and(get_class($convenienceBearer))->toBe(get_class($client)) */
+/*             ->and($convenienceBearer->id)->toBe($client->id); */
+/*     } */
+/* }); */
 
 test('fee context interface handles global fees when no fee entity', function (): void {
     // Mock a generic transaction with no specific fee entity

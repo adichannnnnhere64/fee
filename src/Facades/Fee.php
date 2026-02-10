@@ -4,6 +4,7 @@ namespace Repay\Fee\Facades;
 
 use Illuminate\Support\Facades\Facade;
 use Repay\Fee\DTO\CreateFee;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @method static \Repay\Fee\Models\FeeRule getActiveFeeFor($entity, string $itemType)
@@ -15,6 +16,7 @@ use Repay\Fee\DTO\CreateFee;
  * @method static void clearCacheForEntity($entity)
  * @method static array getHistoryForEntity($entity, array $filters = [])
  * @method static array getGlobalHistory(array $filters = [])
+ * @method static Builder getQueryGlobalHistory(array $filters = [])
  * @method static void logFeeChange($feeRule, array $oldData, string $reason)
  * @method static array getLatestUpcomingFees($entity = null)
  * @method static \Repay\Fee\Models\FeeRule|null getUpcomingFee(string $itemType, $entity = null)
@@ -41,6 +43,15 @@ use Repay\Fee\DTO\CreateFee;
  * @method static array getHourlyBreakdown(array $filters = [])
  * @method static array getComparativeAnalysis(array $filters1 = [], array $filters2 = [])
  * @method static array getCustomReport(array $filters = [], array $metrics = [])
+ *
+ *
+ *  * @method static \Illuminate\Pagination\LengthAwarePaginator getAllFeeTransactions(array $filters = [])
+ * @method static \Illuminate\Database\Eloquent\Builder getQueryAllFeeTransactions(array $filters = [])
+
+ * @method static array getFeeTransactionStats(array $filters = [])
+ * @method static \Illuminate\Support\Collection getFeeTransactionsByPeriod(string $period = 'day', array $filters = [])
+ * @method static \Illuminate\Support\Collection getFeeTransactionsByFeeType(array $filters = [])
+ * @method static \Illuminate\Pagination\LengthAwarePaginator searchFeeTransactions(string $searchTerm, array $filters = [])
  */
 class Fee extends Facade
 {

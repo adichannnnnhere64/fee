@@ -4,13 +4,45 @@ namespace Repay\Fee\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
 use Repay\Fee\Enums\CalculationType;
 
+/**
+ * @property int $id
+ * @property string|null $entity_type
+ * @property int|null $entity_id
+ * @property string $item_type
+ * @property string $fee_type
+ * @property string $type
+ * @property float $value
+ * @property CalculationType $calculation_type
+ * @property bool $is_active
+ * @property bool $is_global
+ * @property string $formatted_value
+ * @property bool $apply_to_existing_entity
+ * @property \Carbon\Carbon|null $effective_from
+ * @property \Carbon\Carbon|null $effective_to
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @property \Illuminate\Database\Eloquent\Collection|FeeHistory[] $fee_history
+ * @property FeeHistory|null $latest_fee_history
+ * @method static Builder|FeeRule active()
+ * @method static Builder|FeeRule upcoming()
+ * @method static Builder|FeeRule global()
+ * @method static Builder|FeeRule forItemType(string $itemType)
+ * @method static Builder|FeeRule forFeeType(string $feeType)
+ * @method static Builder|FeeRule forEntity($entity)
+ */
 class FeeRule extends Model
 {
+    use HasFactory;
+
     protected $table = 'fee_rules';
 
     protected $fillable = [
@@ -79,7 +111,7 @@ class FeeRule extends Model
             /*     $q->whereNull('effective_to') */
             /*         ->orWhere('effective_to', '>', $now); */
             /* }) */
-            ->orderBy('effective_from', 'desc') // Most recent first
+            ->orderBy('id', 'desc') // Most recent first
             ->limit(1); // Get only the most recent
     }
 
@@ -132,8 +164,10 @@ class FeeRule extends Model
 
         return $query->where('is_active', true)
             ->whereNotNull('effective_from')
-            ->where('effective_from', '>', $now);
+            ->where('effective_from', '>', $now)
+            ;
         /* ->where(function ($q) use ($now): void { */
+
         /*     $q->whereNull('effective_to') */
         /*         ->orWhere('effective_to', '>', $now); */
         /* }); */
@@ -184,7 +218,7 @@ class FeeRule extends Model
             'global_fee_id' => $globalFee->id, // Track which global fee was used
             'global_fee_effective_from' => $globalFee->effective_from, // When the global fee became active
             'is_revert_to_global' => true,
-	   'apply_to_existing_entity' => $globalFee->apply_to_existing_entity
+            'apply_to_existing_entity' => $globalFee->apply_to_existing_entity,
         ];
     }
 
@@ -280,4 +314,30 @@ class FeeRule extends Model
             'is_active' => false,
         ]);
     }
+
+    /**
+     * Get a formatted value string for display
+     */
+    public function getFormattedValueAttribute(): string
+    {
+        if ($this->calculation_type === CalculationType::PERCENTAGE) {
+            return rtrim(rtrim(number_format($this->value, 2), '0'), '.').'%';
+        }
+
+        return number_format($this->value, 2);
+    }
+
+        public function fee_history(): HasMany
+    {
+        return $this->hasMany(FeeHistory::class, 'fee_rule_id', 'id');
+    }
+
+    // Optional: latest history
+    public function latest_fee_history(): HasOne
+    {
+        return $this->hasOne(FeeHistory::class, 'fee_rule_id', 'id')
+                    ->latest('created_at');
+
+    }
+
 }

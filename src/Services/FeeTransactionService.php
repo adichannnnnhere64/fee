@@ -2,6 +2,10 @@
 
 namespace Repay\Fee\Services;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Repay\Fee\Contracts\FeeableInterface;
 use Repay\Fee\Contracts\FeeContextInterface;
 use Repay\Fee\Enums\FeeTransactionStatus;
@@ -296,4 +300,221 @@ class FeeTransactionService
 
         return $query->paginate($filters['per_page'] ?? 15);
     }
+
+      public function getAllFeeTransactions(array $filters = []): LengthAwarePaginator
+
+    {
+        $query = FeeTransaction::query()
+            ->with(['feeRule']) // Keep it simple, remove feeBearer/feeable for now
+            ->orderBy('applied_at', 'desc');
+
+        // Apply filters
+        $query = $this->applyTransactionFilters($query, $filters);
+
+
+        return $query->paginate($filters['per_page'] ?? 15);
+    }
+
+      public function getQueryAllFeeTransactions(array $filters = []): Builder
+
+    {
+        $query = FeeTransaction::query()
+            ->with(['feeRule'])
+            ->orderBy('applied_at', 'desc');
+
+        // Apply filters
+        $query = $this->applyTransactionFilters($query, $filters);
+
+
+        return $query;
+    }
+
+    /**
+     * Get fee transactions summary statistics
+     */
+    public function getFeeTransactionStats(array $filters = []): array
+    {
+        $query = FeeTransaction::query();
+        $query = $this->applyTransactionFilters($query, $filters);
+
+        return [
+
+            'total_transactions' => $query->count(),
+            'total_fee_amount' => (float) $query->sum('fee_amount'),
+            'total_transaction_amount' => (float) $query->sum('transaction_amount'),
+            'avg_fee_amount' => (float) $query->avg('fee_amount'),
+            'min_fee_amount' => (float) $query->min('fee_amount'),
+            'max_fee_amount' => (float) $query->max('fee_amount'),
+        ];
+    }
+
+    /**
+     * Get fee transactions grouped by period (day, week, month, year)
+     * Using PHP grouping instead of database grouping
+     */
+    public function getFeeTransactionsByPeriod(string $period = 'day', array $filters = []): Collection
+    {
+        $query = FeeTransaction::query();
+        $query = $this->applyTransactionFilters($query, $filters);
+        $transactions = $query->orderBy('applied_at')->get();
+
+        $grouped = collect();
+
+
+        foreach ($transactions as $transaction) {
+            $date = Carbon::parse($transaction->applied_at);
+
+
+            $periodKey = match ($period) {
+                'hour' => $date->format('Y-m-d H:00:00'),
+
+                'day' => $date->format('Y-m-d'),
+                'week' => $date->format('Y-W'),
+                'month' => $date->format('Y-m'),
+                'year' => $date->format('Y'),
+                default => $date->format('Y-m-d'),
+            };
+
+            if (!$grouped->has($periodKey)) {
+                $grouped->put($periodKey, [
+                    'period' => $periodKey,
+                    'transaction_count' => 0,
+                    'total_fee_amount' => 0,
+                    'total_transaction_amount' => 0,
+                    'fee_amounts' => [],
+                ]);
+            }
+
+            $group = $grouped->get($periodKey);
+            $group['transaction_count']++;
+            $group['total_fee_amount'] += (float) $transaction->fee_amount;
+            $group['total_transaction_amount'] += (float) $transaction->transaction_amount;
+            $group['fee_amounts'][] = (float) $transaction->fee_amount;
+
+            $grouped->put($periodKey, $group);
+        }
+
+        // Calculate averages
+        return $grouped->map(function ($group) {
+
+            $group['avg_fee_amount'] = $group['transaction_count'] > 0
+                ? $group['total_fee_amount'] / $group['transaction_count']
+                : 0;
+            $group['min_fee_amount'] = !empty($group['fee_amounts']) ? min($group['fee_amounts']) : 0;
+            $group['max_fee_amount'] = !empty($group['fee_amounts']) ? max($group['fee_amounts']) : 0;
+            unset($group['fee_amounts']);
+            return $group;
+
+        })->sortByDesc('period')->values();
+
+    }
+
+    /**
+     * Get fee transactions by fee type
+     */
+    public function getFeeTransactionsByFeeType(array $filters = []): Collection
+    {
+        $query = FeeTransaction::query();
+
+        $filtersWithoutFeeType = array_diff_key($filters, ['fee_type' => null]);
+        $query = $this->applyTransactionFilters($query, $filtersWithoutFeeType);
+        $transactions = $query->get();
+
+        $grouped = $transactions->groupBy('fee_type')->map(function ($group, $feeType) {
+
+            $feeAmounts = $group->pluck('fee_amount')->map(fn($amount) => (float) $amount);
+
+            return [
+                'fee_type' => $feeType,
+                'transaction_count' => $group->count(),
+                'total_fee_amount' => $group->sum('fee_amount'),
+                'total_transaction_amount' => $group->sum('transaction_amount'),
+                'avg_fee_amount' => $feeAmounts->avg(),
+                'min_fee_amount' => $feeAmounts->min(),
+                'max_fee_amount' => $feeAmounts->max(),
+            ];
+
+        });
+
+
+        return $grouped->sortByDesc('total_fee_amount')->values();
+    }
+
+    public function searchFeeTransactions(string $searchTerm, array $filters = []): LengthAwarePaginator
+    {
+        $query = FeeTransaction::query()
+            ->with(['feeRule'])
+            ->where(function ($q) use ($searchTerm) {
+                $q->where('transaction_id', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('reference_number', 'LIKE', "%{$searchTerm}%");
+            });
+
+        $query = $this->applyTransactionFilters($query, $filters);
+
+        return $query->orderBy('applied_at', 'desc')
+                    ->paginate($filters['per_page'] ?? 15);
+
+    }
+
+    /**
+
+     * Helper method to apply filters to query
+     */
+    protected function applyTransactionFilters($query, array $filters)
+    {
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['fee_type'])) {
+            if (is_array($filters['fee_type'])) {
+                $query->whereIn('fee_type', $filters['fee_type']);
+            } else {
+                $query->where('fee_type', $filters['fee_type']);
+            }
+
+        }
+
+
+        if (isset($filters['start_date'])) {
+            $query->whereDate('applied_at', '>=', $filters['start_date']);
+        }
+
+        if (isset($filters['end_date'])) {
+
+            $query->whereDate('applied_at', '<=', $filters['end_date']);
+        }
+
+        if (isset($filters['fee_bearer_type'])) {
+            $query->where('fee_bearer_type', $filters['fee_bearer_type']);
+        }
+
+        if (isset($filters['fee_bearer_id'])) {
+
+            $query->where('fee_bearer_id', $filters['fee_bearer_id']);
+        }
+
+        if (isset($filters['feeable_type'])) {
+            $query->where('feeable_type', $filters['feeable_type']);
+
+        }
+
+
+        if (isset($filters['feeable_id'])) {
+            $query->where('feeable_id', $filters['feeable_id']);
+
+        }
+
+        if (isset($filters['min_amount'])) {
+            $query->where('fee_amount', '>=', $filters['min_amount']);
+        }
+
+        if (isset($filters['max_amount'])) {
+            $query->where('fee_amount', '<=', $filters['max_amount']);
+        }
+
+        return $query;
+
+    }
+
 }

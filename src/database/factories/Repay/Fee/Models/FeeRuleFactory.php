@@ -3,6 +3,7 @@
 namespace Database\Factories\Repay\Fee\Models;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Repay\Fee\Enums\CalculationType;
 use Repay\Fee\Models\FeeRule;
 
 class FeeRuleFactory extends Factory
@@ -18,13 +19,6 @@ class FeeRuleFactory extends Factory
             'item_type' => 'product',
             'calculation_type' => CalculationType::PERCENTAGE,
             'value' => $this->faker->randomFloat(2, 1, 30),
-            'min_amount' => null,
-            'max_amount' => null,
-            'is_exclusive' => false,
-            'priority' => 0,
-            'conditions' => null,
-            'effective_from' => null,
-            'deactivated_at' => null, // NEW
         ];
     }
 

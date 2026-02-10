@@ -2,6 +2,9 @@
 
 namespace Repay\Fee;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Repay\Fee\Contracts\FeeableInterface;
 use Repay\Fee\Contracts\FeeContextInterface;
 use Repay\Fee\DTO\AnalyticsFilter;
@@ -92,6 +95,11 @@ class Fee
     public function getGlobalHistory(array $filters = []): array
     {
         return $this->history->getGlobal($filters);
+    }
+
+    public function getQueryGlobalHistory(array $filters = []): Builder
+    {
+        return $this->history->getQueryGlobal($filters);
     }
 
     public function logFeeChange($feeRule, array $oldData, string $reason): void
@@ -282,4 +290,56 @@ class Fee
         // Otherwise use the full context method
         return $this->processFeeContext($context);
     }
+
+        /**
+     * Get all fee transactions with filters
+     */
+    public function getAllFeeTransactions(array $filters = []): LengthAwarePaginator
+    {
+        return $this->transactions->getAllFeeTransactions($filters);
+    }
+
+    /**
+     * Get query builder for all fee transactions
+     */
+    public function getQueryAllFeeTransactions(array $filters = []): Builder
+    {
+        return $this->transactions->getQueryAllFeeTransactions($filters);
+    }
+
+    /**
+     * Get fee transaction statistics
+     */
+
+    public function getFeeTransactionStats(array $filters = []): array
+
+    {
+        return $this->transactions->getFeeTransactionStats($filters);
+    }
+
+    /**
+     * Get fee transactions grouped by period
+     */
+    public function getFeeTransactionsByPeriod(string $period = 'day', array $filters = []): Collection
+    {
+        return $this->transactions->getFeeTransactionsByPeriod($period, $filters);
+    }
+
+
+    /**
+     * Get fee transactions grouped by fee type
+     */
+    public function getFeeTransactionsByFeeType(array $filters = []): Collection
+    {
+        return $this->transactions->getFeeTransactionsByFeeType($filters);
+    }
+
+    /**
+     * Search fee transactions
+     */
+    public function searchFeeTransactions(string $searchTerm, array $filters = []): LengthAwarePaginator
+    {
+        return $this->transactions->searchFeeTransactions($searchTerm, $filters);
+    }
+
 }

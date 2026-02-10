@@ -46,31 +46,54 @@ class TestCase extends Orchestra
     /**
      * Create a mock entity for testing
      */
+
     protected function mockEntity(string $modelName = 'User', int $id = 1)
+{
+    return new class($modelName, $id)
     {
-        return new class($modelName, $id)
+        public $id;
+        public $name;
+        public $modelName;
+
+        public function __construct($modelName, $id)
         {
-            public $id;
+            $this->id = $id;
+            $this->name = "Test {$modelName} {$id}";
+            $this->modelName = $modelName;
 
-            public $name;
+        }
 
-            public function __construct($modelName, $id)
-            {
-                $this->id = $id;
-                $this->name = "Test {$modelName} {$id}";
-            }
 
-            public function getKey()
-            {
-                return $this->id;
-            }
+        public function getKey()
+        {
+            return $this->id;
+        }
 
-            // This simulates Laravel's morph class resolution
-            public function getMorphClass()
-            {
-                return "App\\Models\\{$this->name}";
-            }
-        };
+        public function getMorphClass()
+        {
+
+            return "App\\Models\\{$this->modelName}";
+        }
+
+        // Add a static method to create without constructor for morph relationships
+        public static function __set_state($array)
+        {
+            $instance = new self($array['modelName'] ?? 'User', $array['id'] ?? 1);
+            return $instance;
+        }
+
+
+        // Add sleep/wakeup methods for serialization
+        public function __sleep()
+        {
+            return ['id', 'name', 'modelName'];
+        }
+
+        public function __wakeup()
+        {
+            // Reconstruct if needed
+        }
+    };
     }
 
     protected function createActiveFeeRule(array $data = []): \Repay\Fee\Models\FeeRule
@@ -169,4 +192,5 @@ class TestCase extends Orchestra
             });
         }
     }
+
 }
